@@ -6,6 +6,7 @@ const sounds = [
   { id: 'viento',  name: 'Viento',   icon: 'ti-wind',          file: 'audios/viento.mp3',        loop: true  },
   { id: 'trueno',  name: 'Trueno',   icon: 'ti-bolt',          file: 'audios/trueno2.wav',       loop: false },
   { id: 'buho',    name: 'Búho',     icon: 'ti-feather',       file: 'audios/buho.mp3',          loop: false },
+  { id: 'buho2',   name: 'Búho 2',   icon: 'ti-feather',       file: 'audios/buho2.mp3',          loop: false },
   { id: 'olas',    name: 'Olas',     icon: 'ti-ripple',        file: 'audios/olas.mp3',          loop: true  },
   { id: 'fogata',  name: 'Fogata',   icon: 'ti-flame',         file: 'audios/fogata.mp3',        loop: true  },
   { id: 'bosque',  name: 'Bosque',   icon: 'ti-trees',         file: 'audios/bosque.mp3',        loop: true  },
@@ -354,9 +355,27 @@ function initRain() {
     // Cancelar fade-out pendiente si el usuario reactiva rápido
     cancelAnimationFrame(rain._fadeRaf);
     rain.running = true;
-    rain.fadeOpacity = 1;
+    rain.fadeOpacity = 0;
     drops = Array.from({ length: drops.length || Math.floor((canvas.width / 480) * 80 + 40) }, () => makeDroplet(false));
     draw();
+
+    // Fade-in suave en ~1500ms (simétrico al fade-out)
+    const DURATION = 1500;
+    const startTime = performance.now();
+
+    function fadeIn(now) {
+      if (!rain.running) return; // cancelado antes de terminar
+      const progress = Math.min((now - startTime) / DURATION, 1);
+      rain.fadeOpacity = progress;
+      if (progress < 1) {
+        rain._fadeRaf = requestAnimationFrame(fadeIn);
+      } else {
+        rain.fadeOpacity = 1;
+        rain._fadeRaf = null;
+      }
+    }
+
+    rain._fadeRaf = requestAnimationFrame(fadeIn);
   };
 
   rain.stop = () => {
