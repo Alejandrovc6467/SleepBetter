@@ -184,6 +184,7 @@ async function toggleSound(s) {
     markActive(s.id, true);
     addNowPlayingCard(s);
     updatePlayingCount();
+    if (s.id === 'lluvia') rain.start();
   }
 }
 
@@ -195,6 +196,7 @@ function removeSound(s) {
   markActive(s.id, false);
   removeNowPlayingCard(s.id);
   updatePlayingCount();
+  if (s.id === 'lluvia') rain.stop();
 }
 
 // ── Marcar círculo activo / inactivo ─────────────────────────────────────
@@ -284,14 +286,15 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 // ── Animación de lluvia ───────────────────────────────────────────────────
+// rain.start() / rain.stop() se llaman desde toggleSound / removeSound
+const rain = { running: false, _raf: null, fadeOpacity: 1, _fadeRaf: null };
+
 function initRain() {
   const canvas = document.getElementById('rain-canvas');
   if (!canvas) return;
-  const ctx = canvas.getContext('2d');
+  const rainCtx = canvas.getContext('2d');
 
-  // Gotas: { x, y, len, speed, opacity, width }
   let drops = [];
-  let raf;
 
   function resize() {
     canvas.width  = canvas.offsetWidth;
@@ -313,44 +316,78 @@ function initRain() {
       speed,
       opacity: 0.12 + Math.random() * 0.28,
       width:   0.6 + Math.random() * 0.8,
-      // ángulo ligero hacia la derecha (viento suave)
       drift:   speed * 0.18,
     };
   }
 
   function draw() {
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    if (!rain.running && rain.fadeOpacity <= 0) {
+      rainCtx.clearRect(0, 0, canvas.width, canvas.height);
+      rain._raf = null;
+      return;
+    }
+
+    rainCtx.clearRect(0, 0, canvas.width, canvas.height);
 
     drops.forEach(d => {
-      ctx.beginPath();
-      ctx.moveTo(d.x, d.y);
-      ctx.lineTo(d.x + d.drift, d.y + d.len);
-      ctx.strokeStyle = `rgba(174, 210, 255, ${d.opacity})`;
-      ctx.lineWidth   = d.width;
-      ctx.lineCap     = 'round';
-      ctx.stroke();
+      rainCtx.beginPath();
+      rainCtx.moveTo(d.x, d.y);
+      rainCtx.lineTo(d.x + d.drift, d.y + d.len);
+      rainCtx.strokeStyle = `rgba(174, 210, 255, ${d.opacity * rain.fadeOpacity})`;
+      rainCtx.lineWidth   = d.width;
+      rainCtx.lineCap     = 'round';
+      rainCtx.stroke();
 
-      // avanzar
       d.y += d.speed;
       d.x += d.drift * 0.3;
 
-      // reset al salir del canvas
       if (d.y > canvas.height + 20) {
         Object.assign(d, makeDroplet(false));
       }
     });
 
-    raf = requestAnimationFrame(draw);
+    rain._raf = requestAnimationFrame(draw);
   }
 
-  resize();
-  draw();
-
-  // Re-ajustar si cambia el tamaño (orientación, etc.)
-  window.addEventListener('resize', () => {
-    cancelAnimationFrame(raf);
-    resize();
+  rain.start = () => {
+    if (rain.running) return;
+    // Cancelar fade-out pendiente si el usuario reactiva rápido
+    cancelAnimationFrame(rain._fadeRaf);
+    rain.running = true;
+    rain.fadeOpacity = 1;
+    drops = Array.from({ length: drops.length || Math.floor((canvas.width / 480) * 80 + 40) }, () => makeDroplet(false));
     draw();
+  };
+
+  rain.stop = () => {
+    rain.running = false;
+    // Fade-out suave en ~1500ms
+    const DURATION = 1500;
+    const start = performance.now();
+    const startOpacity = rain.fadeOpacity;
+
+    function fade(now) {
+      const elapsed = now - start;
+      const progress = Math.min(elapsed / DURATION, 1);
+      rain.fadeOpacity = startOpacity * (1 - progress);
+      if (progress < 1) {
+        rain._fadeRaf = requestAnimationFrame(fade);
+      } else {
+        rain.fadeOpacity = 0;
+      }
+    }
+
+    rain._fadeRaf = requestAnimationFrame(fade);
+  };
+
+  resize();
+  // No arrancamos draw() aquí — esperamos a que lluvia se active
+
+  window.addEventListener('resize', () => {
+    cancelAnimationFrame(rain._raf);
+    rain._raf = null;
+    resize();
+    if (rain.running) draw();
   });
 }
 // ── TEMPORIZADOR ──────────────────────────────────────────────────────────
