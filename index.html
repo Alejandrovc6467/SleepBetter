@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover"/>
+  <title>Sonidos para Dormir</title>
+  <link rel="stylesheet" href="styles.css" />
+  <link rel="manifest" href="manifest.json" />
+  <meta name="theme-color" content="#0d1117" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.11.0/dist/tabler-icons.min.css" />
+  <script>
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('./service-worker.js');
+    }
+  </script>
+</head>
+<body>
+
+  <!-- BLOQUE FIJO: Hero + Sonando ahora -->
+  <div class="sticky-header">
+
+    <!-- SECCIÓN 1: Wallpaper / Hero -->
+    <section class="hero" id="hero">
+      <div class="hero-overlay">
+        <canvas id="rain-canvas"></canvas>
+      </div>
+      <div class="hero-content">
+        <!-- Controles izquierda: temporizador + mute -->
+        <div class="hero-controls">
+          <!-- Temporizador -->
+          <div class="timer-widget" id="timer-widget">
+            <div class="timer-header">
+              <span class="timer-label">Temporizador</span>
+              <span class="timer-dot" id="timer-dot"></span>
+            </div>
+            <div class="timer-display" id="timer-display">--:--:--</div>
+            <button class="timer-btn" id="timer-btn" aria-label="Configurar temporizador">
+              <i class="ti ti-clock-play" aria-hidden="true"></i>
+            </button>
+          </div>
+          <!-- Mute -->
+          <button class="mute-toggle" id="mute-toggle" aria-label="Silenciar todos los sonidos" aria-pressed="false">
+            <i class="ti ti-volume" aria-hidden="true" id="mute-icon"></i>
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- SECCIÓN 2: Sonando ahora -->
+    <section class="now-playing-section" id="now-playing-section">
+      <div class="section-header">
+        <span class="section-label">
+          <i class="ti ti-wave-sine" aria-hidden="true"></i>
+          Sonando ahora
+          <span class="eq-header" id="eq-header" aria-hidden="true">
+            <span></span><span></span><span></span>
+          </span>
+        </span>
+        <span class="playing-count" id="playing-count">0</span>
+      </div>
+      <div class="now-playing-list" id="now-playing-list">
+        <div class="empty-state" id="empty-state">
+          <i class="ti ti-music-off" aria-hidden="true"></i>
+          <span>Ningún sonido activo</span>
+        </div>
+      </div>
+    </section>
+
+  </div><!-- /sticky-header -->
+
+  <!-- SECCIÓN 3: Biblioteca de sonidos (scrolleable) -->
+  <section class="library-section">
+    <div class="section-header">
+      <span class="section-label">
+        <i class="ti ti-music" aria-hidden="true"></i>
+        Biblioteca
+      </span>
+    </div>
+    <div class="sounds-grid" id="sounds-grid"></div>
+  </section>
+
+  <!-- Modal temporizador -->
+  <div class="timer-modal-overlay" id="timer-modal-overlay" aria-hidden="true">
+    <div class="timer-modal" role="dialog" aria-label="Seleccionar duración">
+      <div class="timer-modal-header">
+        <div class="timer-modal-title">Apagar en…</div>
+        <button class="timer-modal-close" id="timer-modal-close" aria-label="Cerrar">
+          <i class="ti ti-x" aria-hidden="true"></i>
+        </button>
+      </div>
+      <div class="timer-options">
+        <button class="timer-option" data-minutes="25">25 min</button>
+        <button class="timer-option" data-minutes="35">35 min</button>
+        <button class="timer-option" data-minutes="60">1 hora</button>
+        <button class="timer-option" data-minutes="90">1h 30m</button>
+        <button class="timer-option" data-minutes="120">2 horas</button>
+      </div>
+      <button class="timer-stop" id="timer-stop">
+        <i class="ti ti-player-stop" aria-hidden="true"></i>
+        Detener temporizador
+      </button>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
