@@ -259,8 +259,8 @@ body {
   transform: scale(.96) translateY(8px);
   transition: transform .25s ease;
   background: rgba(219, 219, 219, 0.123);
-  backdrop-filter: blur(3px);
-  -webkit-backdrop-filter: blur(30px);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
   border: 1px solid rgba(255,255,255,.18);
   border-radius: var(--radius-md);
   padding: .5rem .65rem;
