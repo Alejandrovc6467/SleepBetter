@@ -91,8 +91,65 @@ function pickRandomInterval() {
   return RANDOM_INTERVALS[Math.floor(Math.random() * RANDOM_INTERVALS.length)];
 }
 
+// ── Animación de relámpago ────────────────────────────────────────────────
+function lightningFlash() {
+  const hero = document.querySelector('.hero');
+  if (!hero) return;
+
+  // Insertar dentro de hero-overlay para quedar bajo el rain-canvas y hero-content
+  const overlay = hero.querySelector('.hero-overlay');
+  const container = overlay || hero;
+
+  const img = document.createElement('img');
+  img.style.cssText = `
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    z-index: 0;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0ms;
+  `;
+  container.insertBefore(img, container.firstChild);
+
+  // Secuencia: trueno_uno → trueno_dos → trueno_uno → fade out
+  // Duraciones (ms): cada frame visible + transición
+  const frames = [
+    { src: 'trueno_uno.jpg',  dur: 400  },
+    { src: 'trueno_dos.jpg',  dur: 400  }, 
+  ];
+
+  let i = 0;
+
+  function showFrame() {
+
+    //esperar 2seg antes de mostrar el primer frame para que se vea el fade-in
+   
+
+
+    if (i >= frames.length) {
+      // Fade out y eliminar
+      img.style.transition = 'opacity 120ms ease-out';
+      img.style.opacity = '0';
+      setTimeout(() => img.remove(), 150);
+      return;
+    }
+    img.src = frames[i].src;
+    img.style.opacity = '1';
+    const dur = frames[i].dur;
+    i++;
+    setTimeout(showFrame, dur);
+  }
+
+  setTimeout(showFrame, 1600);
+
+ // showFrame();
+}
+
 // ── Reproducir el buffer una sola vez (sin loop) ──────────────────────────
-function playOnce(s) {
+function playOnce(s, flash) {
   const st = state[s.id];
   if (!st.playing) return;
 
@@ -107,6 +164,9 @@ function playOnce(s) {
 
   // Guardar referencia para poder parar si el usuario desactiva
   st.source = src;
+
+  // Animación de relámpago solo en la primera reproducción
+  if (flash && s.id === 'trueno') lightningFlash();
 }
 
 // ── Programar la siguiente reproducción aleatoria ─────────────────────────
@@ -115,9 +175,10 @@ function scheduleRandom(s) {
   if (!st.playing) return;
 
   const delay = pickRandomInterval() * 1000;
+
   st.randomTimeout = setTimeout(() => {
     if (!st.playing) return;
-    playOnce(s);
+    playOnce(s, true);
     scheduleRandom(s); // programar la siguiente
   }, delay);
 }
@@ -140,8 +201,8 @@ function startSource(s) {
     st.source.connect(st.gainNode);
     st.source.start(0);
   } else {
-    // Reproducción aleatoria: suena inmediatamente y luego a intervalos random
-    playOnce(s);
+    // Reproducción aleatoria: suena inmediatamente (con flash si aplica) y luego a intervalos random
+    playOnce(s, true);
     scheduleRandom(s);
   }
 }
