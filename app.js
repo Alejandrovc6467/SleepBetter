@@ -247,6 +247,7 @@ async function toggleSound(s) {
     addNowPlayingCard(s);
     updatePlayingCount();
     if (s.id === 'lluvia') rain.start();
+    if (s.id === 'buho' || s.id === 'buho2') owl.arrive();
   }
 }
 
@@ -259,6 +260,11 @@ function removeSound(s) {
   removeNowPlayingCard(s.id);
   updatePlayingCount();
   if (s.id === 'lluvia') rain.stop();
+  if (s.id === 'buho' || s.id === 'buho2') {
+    // Solo retirar si el otro búho tampoco está activo
+    const otherOwl = s.id === 'buho' ? 'buho2' : 'buho';
+    if (!state[otherOwl] || !state[otherOwl].playing) owl.leave();
+  }
 }
 
 // ── Marcar círculo activo / inactivo ─────────────────────────────────────
@@ -343,12 +349,252 @@ document.addEventListener('DOMContentLoaded', () => {
   buildGrid();
   updatePlayingCount();
   initRain();
+  initOwl();
   initTimer();
   initMute();
 });
 
+// ── ANIMACIÓN DEL BÚHO ───────────────────────────────────────────────────
+// Imágenes usadas:
+//   buho-volando-alas-arriba.png  → sprite vuelo frame A
+//   buho-volando-alas-abajo.png   → sprite vuelo frame B
+//   buho-ojos-abiertos.png        → posado, ojos abiertos
+//   buho-ojos-cerrados.png        → posado, ojos cerrados (parpadeo lento)
+//
+// Flujo: vuela derecha→izquierda hasta la banca → se posa → alterna ojos cada 5 s
+//        al quitar el sonido, vuela hacia la derecha y desaparece
+
+const owl = (() => {
+  let el = null;           // <img> del búho
+  let perchX = 0;          // posición X de la banca (% del ancho del hero)
+  let perchY = 0;          // posición Y donde se posa
+  let _flyInterval = null; // intervalo de aleteo durante vuelo
+  let _blinkTimeout = null;// timeout de parpadeo posado
+  let _phase = 'idle';     // 'idle' | 'flying-in' | 'perched' | 'flying-out'
+
+  // Coordenadas exactas de la banca en el wallpaper original
+  const IMG_W   = 2032;  // ancho original de wallpaper.jpg
+  const IMG_H   = 1118;  // alto original de wallpaper.jpg
+  const BENCH_X = 845;   // coordenada X de la banca en el original
+  const BENCH_Y = 753;   // coordenada Y de la banca en el original
+  const OWL_SIZE = 32;   // px, tamaño del sprite en pantalla
+
+  function getHero() {
+    return document.querySelector('.hero');
+  }
+
+  function createEl() {
+    if (el) return;
+    const hero = getHero();
+    if (!hero) return;
+
+    el = document.createElement('img');
+    el.className = 'owl-sprite';
+    el.style.cssText = `
+      position: absolute;
+      width: ${OWL_SIZE}px;
+      height: ${OWL_SIZE}px;
+      object-fit: contain;
+      z-index: 0;
+      pointer-events: none;
+      image-rendering: pixelated;
+      transition: opacity 0.3s ease;
+      transform-origin: center center;
+    `;
+    el.src = 'buho-volando-alas-arriba.png';
+
+    // Insertar directamente en .hero (fuera del overlay) para quedar sobre el rain-canvas
+    hero.appendChild(el);
+  }
+
+  function removeEl() {
+    if (el) {
+      el.remove();
+      el = null;
+    }
+  }
+
+  /**
+   * Replica exactamente la logica de CSS background-size:cover background-position:center
+   * para mapear coordenadas del wallpaper original a pixeles en el hero.
+   * cover: escala la imagen hasta que ambas dimensiones >= contenedor.
+   * Escala = max(heroW/imgW, heroH/imgH). Luego centra.
+   */
+  function calcPerch() {
+    const hero = getHero();
+    if (!hero) return { x: 0, y: 0 };
+
+    const heroW = hero.offsetWidth;
+    const heroH = hero.offsetHeight;
+
+    // Escala que aplica cover
+    const scale = Math.max(heroW / IMG_W, heroH / IMG_H);
+
+    // Imagen escalada
+    const scaledW = IMG_W * scale;
+    const scaledH = IMG_H * scale;
+
+    // Offset de centrado (background-position: center)
+    const offsetX = (heroW - scaledW) / 2;
+    const offsetY = (heroH - scaledH) / 2;
+
+    // Posicion en pantalla del punto de la banca
+    const screenX = offsetX + BENCH_X * scale;
+    const screenY = offsetY + BENCH_Y * scale;
+
+    // Centrar sprite horizontalmente, alinear base al punto
+    return {
+      x: Math.round(screenX - OWL_SIZE / 2),
+      y: Math.round(screenY - OWL_SIZE) + 1,
+    };
+  }
+
+  // Ciclo de aleteo durante vuelo (alterna los dos frames)
+  function startFlapCycle(intervalMs = 160) {
+    let frame = 0;
+    const frames = ['buho-volando-alas-arriba.png', 'buho-volando-alas-abajo.png'];
+    stopFlapCycle();
+    _flyInterval = setInterval(() => {
+      if (!el) return;
+      frame = (frame + 1) % 2;
+      el.src = frames[frame];
+    }, intervalMs);
+  }
+
+  function stopFlapCycle() {
+    if (_flyInterval) { clearInterval(_flyInterval); _flyInterval = null; }
+  }
+
+  // Parpadeo lento en la banca
+  function startBlinkCycle() {
+    stopBlinkCycle();
+    function blink() {
+      if (!el || _phase !== 'perched') return;
+      el.src = 'buho-ojos-cerrados.png';
+      _blinkTimeout = setTimeout(() => {
+        if (!el || _phase !== 'perched') return;
+        el.src = 'buho-ojos-abiertos.png';
+        _blinkTimeout = setTimeout(blink, 5000);
+      }, 300); // ojos cerrados solo 300ms, luego abre y espera 5s
+    }
+    _blinkTimeout = setTimeout(blink, 5000); // primera vez espera 5s
+  }
+
+  function stopBlinkCycle() {
+    if (_blinkTimeout) { clearTimeout(_blinkTimeout); _blinkTimeout = null; }
+  }
+
+  // Animación manual con requestAnimationFrame (sin CSS transition para control total)
+  function animateFly({ fromX, fromY, toX, toY, duration, onDone, flip = false }) {
+    if (!el) return;
+    const start = performance.now();
+    const dx = toX - fromX;
+    const dy = toY - fromY;
+
+    // Espejo horizontal según dirección
+    el.style.transform = flip ? 'scaleX(-1)' : 'scaleX(1)';
+
+    function step(now) {
+      if (!el) return;
+      const t = Math.min((now - start) / duration, 1);
+      // Ease in-out suave
+      const ease = t < 0.5 ? 2 * t * t : -1 + (4 - 2 * t) * t;
+
+      // Curva de vuelo leve: arco parabólico sutil
+      const arc = Math.sin(t * Math.PI) * -20; // pico en el centro
+
+      el.style.left = (fromX + dx * ease) + 'px';
+      el.style.top  = (fromY + dy * ease + arc) + 'px';
+
+      if (t < 1) {
+        requestAnimationFrame(step);
+      } else {
+        onDone && onDone();
+      }
+    }
+    requestAnimationFrame(step);
+  }
+
+  // ── API pública ──────────────────────────────────────────────────────────
+  function arrive() {
+    if (_phase === 'perched' || _phase === 'flying-in') return;
+
+    _phase = 'flying-in';
+    createEl();
+    if (!el) return;
+
+    const hero  = getHero();
+    const perch = calcPerch();
+    const startX = (hero ? hero.offsetWidth : 400) + 20; // fuera del borde derecho
+    const startY = perch.y + 10;
+
+    // Posición inicial: fuera de la pantalla, a la derecha
+    el.style.left    = startX + 'px';
+    el.style.top     = startY + 'px';
+    el.style.opacity = '1';
+
+    startFlapCycle(140);
+
+    // Volar de derecha a izquierda hasta la banca
+    animateFly({
+      fromX:    startX,
+      fromY:    startY,
+      toX:      perch.x,
+      toY:      perch.y,
+      duration: 1800,
+      flip:     true, // espejo para mirar a la izquierda durante vuelo
+      onDone() {
+        if (_phase !== 'flying-in') return;
+        stopFlapCycle();
+        _phase = 'perched';
+
+        // Poner imagen posado
+        el.style.transform = 'scaleX(1)'; // vuelve a mirar a la derecha
+        el.src = 'buho-ojos-abiertos.png';
+        startBlinkCycle();
+      }
+    });
+  }
+
+  function leave() {
+    if (_phase === 'idle' || _phase === 'flying-out') return;
+
+    _phase = 'flying-out';
+    stopBlinkCycle();
+
+    if (!el) return;
+
+    const hero   = getHero();
+    const perch  = calcPerch();
+    const exitX  = (hero ? hero.offsetWidth : 400) + 20;
+    const exitY  = perch.y - 20;
+
+    el.style.transform = 'scaleX(1)'; // mirar a la derecha al salir
+    startFlapCycle(130);
+
+    animateFly({
+      fromX:    perch.x,
+      fromY:    perch.y,
+      toX:      exitX,
+      toY:      exitY,
+      duration: 1400,
+      flip:     false,
+      onDone() {
+        stopFlapCycle();
+        _phase = 'idle';
+        removeEl();
+      }
+    });
+  }
+
+  return { arrive, leave };
+})();
+
 // ── Animación de lluvia ───────────────────────────────────────────────────
 // rain.start() / rain.stop() se llaman desde toggleSound / removeSound
+// initOwl() no necesita setup adicional; el objeto owl es autocontenido.
+function initOwl() { /* owl se inicializa al llamar owl.arrive() */ }
+
 const rain = { running: false, _raf: null, fadeOpacity: 1, _fadeRaf: null };
 
 function initRain() {

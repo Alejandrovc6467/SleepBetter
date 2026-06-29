@@ -58,7 +58,16 @@ body {
 
 
 
-/* ── STICKY HEADER ────────────────────────────────────────────────────── */
+/* ── BÚHO ANIMADO ────────────────────────────────────────────────────── */
+/* El elemento img del búho se inserta en .hero-overlay con z-index:50   */
+/* lo que lo coloca sobre el rain-canvas (z-index:1) pero bajo           */
+/* .hero-content (z-index:1 relativo al stacking context del hero).      */
+/* Si deseas que el búho quede sobre los controles también, sube a 60.   */
+.hero-overlay img.owl-sprite {
+  z-index: 50;
+}
+
+
 .sticky-header {
   flex-shrink: 0;
   position: sticky;
