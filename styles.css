@@ -29,7 +29,7 @@
   --card-active: #3a3a3c;
   --border:      #2a3441;
   --border-hi:   #3d5470;
-  --accent:      #4D7BF3;
+  --accent:      #3f5ca3;
   --accent-dim:  rgba(124,156,255,.15);
   --accent-glow: rgba(124,156,255,.25);
   --text:        #c9d1d9;
@@ -111,16 +111,17 @@ body {
   flex-direction: column;
   align-items: center;
   justify-content: start;
-  padding: 1rem 1rem 1.25rem;
+  padding: 1rem 1rem .5rem 1rem;
   gap: .5rem;
 }
 
-.hero-title {
+
+.my-name{
+  height: 100%;
+  width: 100%;
   display: flex;
-  flex-direction: column;
-  align-items: center;
-  text-align: center;
-  flex: 1;
+  align-items: end;
+  justify-content: end;
 }
 
 /* ── HERO CONTROLS ───────────────────────────────────────────────────── */
@@ -498,16 +499,16 @@ body {
 }
 
 .np-icon-wrap {
-  width: 36px;
-  height: 36px;
+  width: 40px;
+  height: 40px;
   border-radius: 50%;
   background: var(--accent-dim);
-  border: 1.5px solid var(--accent);
+  /* border: 1.5px solid var(--accent); */
   display: flex;
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
-  color: var(--accent);
+  color: var(--text);
   font-size: 16px;
   position: relative;
 }
@@ -517,17 +518,16 @@ body {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: .35rem;
+  gap: .8em;
   min-width: 0;
 }
 
 .np-name {
   font-size: .63rem;
   font-weight: 500;
-  color: var(--white);
+  color: var(--text2);
   display: flex;
   align-items: center;
-  gap: .3rem;
   white-space: nowrap;
 }
 
@@ -568,6 +568,7 @@ body {
   display: flex;
   align-items: center;
   width: 100%;
+  margin-bottom: 2px;
 }
 
 .np-vol-row input[type="range"] {
@@ -607,8 +608,8 @@ body {
 
 .np-remove {
   position: absolute;
-  top: -6px;
-  right: -6px;
+  top: -5px;
+  right: -8px;
   width: 16px;
   height: 16px;
   border-radius: 50%;
