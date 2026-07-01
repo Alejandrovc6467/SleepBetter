@@ -26,7 +26,7 @@
   --bg:          #010101;
   --surface:     #171719;
   --card:        #171719;
-  --card-active: #3a3a3c;
+  --card-active: #262B3B;
   --border:      #2a3441;
   --border-hi:   #3d5470;
   --accent:      #3f5ca3;
@@ -86,7 +86,7 @@ body {
   position: relative;
   height: 200px;
   overflow: hidden;
-  background: var(--surface) url('wallpaper.jpg') center / cover no-repeat;
+  background: var(--surface) url('images/wallpaper.jpg') center / cover no-repeat;
 }
 
 .hero-overlay {
@@ -424,7 +424,7 @@ body {
 .playing-count {
   font-size: .7rem;
   font-weight: 500;
-  color: var(--accent);
+  color: var(--text2);
   background: var(--accent-dim);
   border: 1px solid rgba(124,156,255,.25);
   border-radius: 20px;
@@ -441,7 +441,6 @@ body {
   padding-top: 15px;
   margin-top: -20px;
   background: var(--surface);
-  /* border-bottom: 1px solid var(--border); */
   padding-bottom: .5rem;
   border-bottom-left-radius: 20px;
   border-bottom-right-radius: 20px;
@@ -503,7 +502,6 @@ body {
   height: 40px;
   border-radius: 50%;
   background: var(--accent-dim);
-  /* border: 1.5px solid var(--accent); */
   display: flex;
   align-items: center;
   justify-content: center;
@@ -549,8 +547,7 @@ body {
   display: block;
   width: 2.5px;
   border-radius: 2px;
-  background: var(--accent);
-  background: #4D7BF3;
+  background: var(--text);
   height: 2px;
   animation: eqMini .8s ease-in-out infinite alternate;
 }
@@ -640,36 +637,51 @@ body {
   overflow: hidden;
 }
 
-.sounds-grid {
-  /* flex: 1;
-  overflow-y: auto;
-  overscroll-behavior: contain;
-  display: grid;
-  grid-template-columns: repeat(1, 1fr);
-  grid-template-rows: repeat(4, 1fr);
-  gap: .75rem;
-  padding: 0 1rem 2rem; */
-
-  /* test */
+.sounds-grid-wrap {
+  position: relative;
   flex: 1;
-    overflow-y: auto;
-    overflow-x: hidden;
+  overflow: hidden;
+}
 
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(70px, 1fr));
+.sounds-grid {
+  height: 100%;
+  overflow-y: auto;
+  overflow-x: hidden;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(70px, 1fr));
+  gap: .75rem;
+  row-gap: 30px;      /* máximo espacio vertical */
+  column-gap: .75rem;
+  align-content: start; /* <-- la clave */
+  padding: 1rem 1rem 2rem;
+  max-width: calc((70px * 8) + (.75rem * 7));
+  width: 100%;
+  margin: 0 auto;
 
-    gap: .75rem;
-    row-gap: 30px;      /* máximo espacio vertical */
-    column-gap: .75rem;
+  /* ocultar scrollbar nativo (lo reemplaza el "fantasma" de abajo) */
+  scrollbar-width: none;        /* Firefox */
+  -ms-overflow-style: none;     /* Edge/IE viejo */
+}
 
-    align-content: start; /* <-- la clave */
+.sounds-grid::-webkit-scrollbar {
+  display: none;                /* Chrome/Safari */
+}
 
-    padding: 1rem 1rem 2rem;
+/* Scrollbar "fantasma": solo visible mientras se hace scroll */
+.custom-scrollbar-thumb {
+  position: absolute;
+  right: 3px;
+  width: 4px;
+  border-radius: 2px;
+  background: rgba(255,255,255,.25);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity .35s ease;
+  z-index: 5;
+}
 
-    max-width: calc((70px * 8) + (.75rem * 7));
-    width: 100%;
-    margin: 0 auto;
-
+.custom-scrollbar-thumb.visible {
+  opacity: 1;
 }
 
 /* ── SOUND CIRCLE ────────────────────────────────────────────────────── */
@@ -720,7 +732,6 @@ body {
   background: var(--card-active);
   border-color: var(--accent);
   color: var(--text);
-  /* box-shadow: 0 0 0 3px var(--accent-dim), 0 4px 16px rgba(124,156,255,.18); */
 }
 
 .sound-btn.active .sound-circle::after {

@@ -3,7 +3,7 @@
 // loop: false → reproducción aleatoria (suena al activar, luego a intervalos random)
 const sounds = [
   { id: 'lluvia',  name: 'Lluvia',   icon: 'ti-cloud-rain',    file: 'audios/lluvia-suave.wav',  loop: true  },
-  { id: 'viento',  name: 'Viento',   icon: 'ti-wind',          file: 'audios/viento.mp3',        loop: true  },
+  { id: 'viento',  name: 'Viento',   icon: 'ti-wind',          file: 'audios/viento-suave.wav',        loop: true  },
   { id: 'trueno',  name: 'Trueno',   icon: 'ti-bolt',          file: 'audios/trueno2.wav',       loop: false },
   { id: 'buho',    name: 'Búho',     icon: 'ti-feather',       file: 'audios/buho.mp3',          loop: false },
   { id: 'buho2',   name: 'Búho 2',   icon: 'ti-feather',       file: 'audios/buho2.mp3',         loop: false },
@@ -117,8 +117,8 @@ function lightningFlash() {
   // Secuencia: trueno_uno → trueno_dos → trueno_uno → fade out
   // Duraciones (ms): cada frame visible + transición
   const frames = [
-    { src: 'trueno_uno.jpg',  dur: 400  },
-    { src: 'trueno_dos.jpg',  dur: 400  }, 
+    { src: 'images/trueno_uno.jpg',  dur: 400  },
+    { src: 'images/trueno_dos.jpg',  dur: 400  }, 
   ];
 
   let i = 0;
@@ -344,6 +344,47 @@ style.textContent = `
 `;
 document.head.appendChild(style);
 
+// ── Scrollbar "fantasma" para la biblioteca ───────────────────────────────
+function initCustomScrollbar() {
+  const grid = $('sounds-grid');
+  const wrap = document.querySelector('.sounds-grid-wrap');
+  if (!grid || !wrap) return;
+
+  const thumb = document.createElement('div');
+  thumb.className = 'custom-scrollbar-thumb';
+  wrap.appendChild(thumb);
+
+  let hideTimeout = null;
+
+  function updateThumb() {
+    const { scrollTop, scrollHeight, clientHeight } = grid;
+
+    if (scrollHeight <= clientHeight) {
+      thumb.classList.remove('visible');
+      return;
+    }
+
+    const thumbHeight = Math.max((clientHeight / scrollHeight) * clientHeight, 28);
+    const maxTop = clientHeight - thumbHeight;
+    const thumbTop = (scrollTop / (scrollHeight - clientHeight)) * maxTop;
+
+    thumb.style.height = `${thumbHeight}px`;
+    thumb.style.top = `${thumbTop}px`;
+  }
+
+  function showThumb() {
+    updateThumb();
+    thumb.classList.add('visible');
+    clearTimeout(hideTimeout);
+    hideTimeout = setTimeout(() => {
+      thumb.classList.remove('visible');
+    }, 900);
+  }
+
+  grid.addEventListener('scroll', showThumb, { passive: true });
+  window.addEventListener('resize', updateThumb);
+}
+
 // ── Init ──────────────────────────────────────────────────────────────────
 document.addEventListener('DOMContentLoaded', () => {
   buildGrid();
@@ -352,6 +393,7 @@ document.addEventListener('DOMContentLoaded', () => {
   initOwl();
   initTimer();
   initMute();
+  initCustomScrollbar();
 });
 
 // ── ANIMACIÓN DEL BÚHO ───────────────────────────────────────────────────
@@ -452,7 +494,7 @@ const owl = (() => {
   // Ciclo de aleteo durante vuelo (alterna los dos frames)
   function startFlapCycle(intervalMs = 160) {
     let frame = 0;
-    const frames = ['buho-volando-alas-arriba.png', 'buho-volando-alas-abajo.png'];
+    const frames = ['images/buho-volando-alas-arriba.png', 'images/buho-volando-alas-abajo.png'];
     stopFlapCycle();
     _flyInterval = setInterval(() => {
       if (!el) return;
@@ -470,10 +512,10 @@ const owl = (() => {
     stopBlinkCycle();
     function blink() {
       if (!el || _phase !== 'perched') return;
-      el.src = 'buho-ojos-cerrados.png';
+      el.src = 'images/buho-ojos-cerrados.png';
       _blinkTimeout = setTimeout(() => {
         if (!el || _phase !== 'perched') return;
-        el.src = 'buho-ojos-abiertos.png';
+        el.src = 'images/buho-ojos-abiertos.png';
         _blinkTimeout = setTimeout(blink, 5000);
       }, 300); // ojos cerrados solo 300ms, luego abre y espera 5s
     }
@@ -550,7 +592,7 @@ const owl = (() => {
 
         // Poner imagen posado
         el.style.transform = 'scaleX(1)'; // vuelve a mirar a la derecha
-        el.src = 'buho-ojos-abiertos.png';
+        el.src = 'images/buho-ojos-abiertos.png';
         startBlinkCycle();
       }
     });
@@ -716,6 +758,8 @@ function initRain() {
     if (rain.running) draw();
   });
 }
+
+
 // ── TEMPORIZADOR ──────────────────────────────────────────────────────────
 let timerInterval = null;
 let timerSecondsLeft = 0;
@@ -812,6 +856,7 @@ function stopAllSounds() {
     }
   });
 }
+
 
 // ── MUTE ──────────────────────────────────────────────────────────────────
 let isMuted = false;
