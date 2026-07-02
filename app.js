@@ -3,22 +3,17 @@
 // loop: false → reproducción aleatoria (suena al activar, luego a intervalos random)
 const sounds = [
   { id: 'lluvia',  name: 'Lluvia',   icon: 'ti-cloud-rain',    file: 'audios/lluvia-suave.wav',  loop: true  },
-  { id: 'viento',  name: 'Viento',   icon: 'ti-wind',          file: 'audios/viento-suave.wav',        loop: true  },
+  { id: 'viento',  name: 'Viento',   icon: 'ti-wind',          file: 'audios/viento-suave.wav',  loop: true  },
   { id: 'trueno',  name: 'Trueno',   icon: 'ti-bolt',          file: 'audios/trueno2.wav',       loop: false },
   { id: 'buho',    name: 'Búho',     icon: 'ti-feather',       file: 'audios/buho.mp3',          loop: false },
   { id: 'buho2',   name: 'Búho 2',   icon: 'ti-feather',       file: 'audios/buho2.mp3',         loop: false },
-  { id: 'olas',    name: 'Olas',     icon: 'ti-ripple',        file: 'audios/olas.mp3',          loop: true  },
+  { id: 'olas',    name: 'Olas',     icon: 'ti-ripple',        file: 'audios/olas.ogg',          loop: true  },
   { id: 'fogata',  name: 'Fogata',   icon: 'ti-flame',         file: 'audios/fogata.mp3',        loop: true  },
-  { id: 'bosque',  name: 'Bosque',   icon: 'ti-trees',         file: 'audios/bosque.mp3',        loop: true  },
-  { id: 'rio',     name: 'Río',      icon: 'ti-droplets',      file: 'audios/rio.mp3',           loop: true  },
-  { id: 'viento',  name: 'Viento',   icon: 'ti-wind',          file: 'audios/viento.mp3',       loop: true  },
-  { id: 'trueno',  name: 'Trueno',   icon: 'ti-bolt',          file: 'audios/trueno2.wav',       loop: false },
-  { id: 'buho',    name: 'Búho',     icon: 'ti-feather',       file: 'audios/buho.mp3',          loop: false },
-  { id: 'olas',    name: 'Olas',     icon: 'ti-ripple',        file: 'audios/olas.mp3',          loop: true  },
-  { id: 'fogata',  name: 'Fogata',   icon: 'ti-flame',         file: 'audios/fogata.mp3',        loop: true  },
-  { id: 'bosque',  name: 'Bosque',   icon: 'ti-trees',         file: 'audios/bosque.mp3',        loop: true  },
-  { id: 'rio',     name: 'Río',      icon: 'ti-droplets',      file: 'audios/rio.mp3',           loop: true  },
-];
+  { id: 'bosque',  name: 'Bosque',   icon: 'ti-trees',         file: 'audios/forest.mp3',        loop: true  },
+  { id: 'rio',     name: 'Río',      icon: 'ti-droplets',      file: 'audios/river.mp3',         loop: true  },
+  { id: 'lobo',    name: 'Lobo',     icon: 'ti-dog',           file: 'audios/wolf.mp3',          loop: false },
+  { id: 'universe',    name: 'Universo',     icon: 'ti-planet',         file: 'audios/universe.mp3',           loop: true },
+]
 
 // ── AudioContext compartido ───────────────────────────────────────────────
 let ctx = null;
