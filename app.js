@@ -313,7 +313,8 @@ function addNowPlayingCard(s) {
   // Botón quitar
   card.querySelector('.np-remove').addEventListener('click', () => removeSound(s));
 
-  list.appendChild(card);
+  // El sonido recién activado aparece primero (izquierda)
+  list.insertBefore(card, list.firstChild);
 }
 
 function removeNowPlayingCard(id) {
