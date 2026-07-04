@@ -1,18 +1,19 @@
 // ── Catálogo de sonidos ───────────────────────────────────────────────────
 // loop: true  → reproducción continua en bucle
 // loop: false → reproducción aleatoria (suena al activar, luego a intervalos random)
+// category: agrupa el sonido dentro del slider de categorías de la biblioteca
 const sounds = [
-  { id: 'lluvia',  name: 'Lluvia',   icon: 'ti-cloud-rain',    file: 'audios/lluvia-suave.wav',  loop: true  },
-  { id: 'viento',  name: 'Viento',   icon: 'ti-wind',          file: 'audios/viento-suave.wav',  loop: true  },
-  { id: 'trueno',  name: 'Trueno',   icon: 'ti-bolt',          file: 'audios/trueno2.wav',       loop: false },
-  { id: 'buho',    name: 'Búho',     icon: 'ti-feather',       file: 'audios/buho.mp3',          loop: false },
-  { id: 'buho2',   name: 'Búho 2',   icon: 'ti-feather',       file: 'audios/buho2.mp3',         loop: false },
-  { id: 'olas',    name: 'Olas',     icon: 'ti-ripple',        file: 'audios/olas.ogg',          loop: true  },
-  { id: 'fogata',  name: 'Fogata',   icon: 'ti-flame',         file: 'audios/fogata.mp3',        loop: true  },
-  { id: 'bosque',  name: 'Bosque',   icon: 'ti-trees',         file: 'audios/forest.mp3',        loop: true  },
-  { id: 'rio',     name: 'Río',      icon: 'ti-droplets',      file: 'audios/river.mp3',         loop: true  },
-  { id: 'lobo',    name: 'Lobo',     icon: 'ti-dog',           file: 'audios/wolf.mp3',          loop: false },
-  { id: 'universe',    name: 'Universo',     icon: 'ti-planet',         file: 'audios/universe.mp3',           loop: true },
+  { id: 'lluvia',  name: 'Lluvia',   icon: 'ti-cloud-rain',    file: 'audios/lluvia-suave.wav',  loop: true,  category: 'Naturaleza' },
+  { id: 'viento',  name: 'Viento',   icon: 'ti-wind',          file: 'audios/viento-suave.wav',  loop: true,  category: 'Naturaleza' },
+  { id: 'trueno',  name: 'Trueno',   icon: 'ti-bolt',          file: 'audios/trueno2.wav',       loop: false, category: 'Naturaleza' },
+  { id: 'buho',    name: 'Búho',     icon: 'ti-feather',       file: 'audios/buho.mp3',          loop: false, category: 'Animales' },
+  { id: 'buho2',   name: 'Búho 2',   icon: 'ti-feather',       file: 'audios/buho2.mp3',         loop: false, category: 'Animales' },
+  { id: 'olas',    name: 'Olas',     icon: 'ti-ripple',        file: 'audios/olas.ogg',          loop: true,  category: 'Agua' },
+  { id: 'fogata',  name: 'Fogata',   icon: 'ti-flame',         file: 'audios/fogata.mp3',        loop: true,  category: 'Ambiente' },
+  { id: 'bosque',  name: 'Bosque',   icon: 'ti-trees',         file: 'audios/forest.mp3',        loop: true,  category: 'Naturaleza' },
+  { id: 'rio',     name: 'Río',      icon: 'ti-droplets',      file: 'audios/river.mp3',         loop: true,  category: 'Agua' },
+  { id: 'lobo',    name: 'Lobo',     icon: 'ti-dog',           file: 'audios/wolf.mp3',          loop: false, category: 'Animales' },
+  { id: 'universe',    name: 'Universo',     icon: 'ti-planet',         file: 'audios/universe.mp3',           loop: true, category: 'Espacio' },
 ]
 
 // ── AudioContext compartido ───────────────────────────────────────────────
@@ -28,6 +29,85 @@ const state = {};   // id → { buffer, source, gainNode, playing, volume, loadi
 // ── Helpers DOM ───────────────────────────────────────────────────────────
 const $ = id => document.getElementById(id);
 
+// ── FAVORITOS (persistidos en localStorage) ───────────────────────────────
+const FAVORITES_KEY = 'sleepbetter:favorites';
+const DEFAULT_FAVORITES = ['lluvia', 'buho', 'buho2', 'trueno', 'fogata', 'lobo'];
+
+function loadFavorites() {
+  try {
+    const raw = localStorage.getItem(FAVORITES_KEY);
+    if (raw) {
+      const arr = JSON.parse(raw);
+      if (Array.isArray(arr)) return new Set(arr);
+    }
+  } catch (e) {
+    console.warn('[SleepBetter] No se pudieron leer los favoritos guardados', e);
+  }
+  // Primera vez que se abre la app: usar favoritos por defecto y guardarlos
+  const defaults = new Set(DEFAULT_FAVORITES);
+  persistFavoritesSet(defaults);
+  return defaults;
+}
+
+function persistFavoritesSet(set) {
+  try {
+    localStorage.setItem(FAVORITES_KEY, JSON.stringify([...set]));
+  } catch (e) {
+    console.warn('[SleepBetter] No se pudieron guardar los favoritos', e);
+  }
+}
+
+const favorites = loadFavorites();
+let favoritesGridEl = null; // referencia al grid de la página "Favoritos"
+
+function toggleFavorite(id) {
+  const wasFav = favorites.has(id);
+  if (wasFav) {
+    favorites.delete(id);
+  } else {
+    favorites.add(id);
+  }
+  persistFavoritesSet(favorites);
+  renderFavoritesGrid();
+  showToast(
+    wasFav ? 'Eliminado de favoritos' : 'Agregado a favoritos',
+    wasFav ? 'ti-heart-off' : 'ti-heart'
+  );
+}
+
+function renderFavoritesGrid() {
+  if (!favoritesGridEl) return;
+  favoritesGridEl.innerHTML = '';
+
+  const filtered = sounds.filter(s => favorites.has(s.id));
+
+  if (filtered.length === 0) {
+    const empty = document.createElement('div');
+    empty.className = 'empty-state favorites-empty';
+    empty.innerHTML = `
+      <i class="ti ti-heart-off" aria-hidden="true"></i>
+      <span>Mantén presionado un sonido para agregarlo aquí</span>
+    `;
+    favoritesGridEl.appendChild(empty);
+    return;
+  }
+
+  filtered.forEach(s => favoritesGridEl.appendChild(createSoundButton(s)));
+}
+
+// ── Burbuja de aviso (toast) ───────────────────────────────────────────────
+let _toastTimeout = null;
+function showToast(message, icon = 'ti-heart') {
+  const toast = $('fav-toast');
+  if (!toast) return;
+  toast.innerHTML = `<i class="ti ${icon}" aria-hidden="true"></i><span>${message}</span>`;
+  toast.classList.add('visible');
+  clearTimeout(_toastTimeout);
+  _toastTimeout = setTimeout(() => {
+    toast.classList.remove('visible');
+  }, 1800);
+}
+
 function updatePlayingCount() {
   const count = Object.values(state).filter(s => s.playing).length;
   $('playing-count').textContent = count;
@@ -36,25 +116,168 @@ function updatePlayingCount() {
   if (eq) eq.classList.toggle('active', count > 0);
 }
 
-// ── Construir grid de biblioteca ──────────────────────────────────────────
-function buildGrid() {
-  const grid = $('sounds-grid');
+// ── Categorías ────────────────────────────────────────────────────────────
+// "Favoritos" siempre primero, luego cada categoría en orden de aparición en `sounds`
+function getCategories() {
+  const cats = [];
   sounds.forEach(s => {
-    state[s.id] = { buffer: null, source: null, gainNode: null, playing: false, volume: 0.5, loading: false, randomTimeout: null };
-
-    const btn = document.createElement('button');
-    btn.className = 'sound-btn';
-    btn.id = `snd-${s.id}`;
-    btn.setAttribute('aria-label', s.name);
-    btn.innerHTML = `
-      <div class="sound-circle">
-        <i class="ti ${s.icon}" aria-hidden="true"></i>
-      </div>
-      <span class="sound-name">${s.name}</span>
-    `;
-    btn.addEventListener('click', () => toggleSound(s));
-    grid.appendChild(btn);
+    if (!cats.includes(s.category)) cats.push(s.category);
   });
+  return ['Favoritos', ...cats];
+}
+
+// ── Crear un botón de sonido (usado en todas las páginas, incl. Favoritos) ─
+// Presión larga (>2s) agrega/quita el sonido de favoritos.
+// Click normal alterna la reproducción, salvo que la presión larga ya haya actuado.
+function createSoundButton(s) {
+  // Inicializar estado del sonido solo una vez (el sonido puede repetirse
+  // entre "Favoritos" y su categoría correspondiente)
+  if (!state[s.id]) {
+    state[s.id] = { buffer: null, source: null, gainNode: null, playing: false, volume: 0.5, loading: false, randomTimeout: null };
+  }
+
+  const btn = document.createElement('button');
+  btn.className = 'sound-btn' + (state[s.id].playing ? ' active' : '');
+  btn.dataset.soundId = s.id;
+  btn.setAttribute('aria-label', s.name);
+  btn.innerHTML = `
+    <div class="sound-circle">
+      <i class="ti ${s.icon}" aria-hidden="true"></i>
+    </div>
+    <span class="sound-name">${s.name}</span>
+  `;
+
+  const LONG_PRESS_MS = 2000;
+  const MOVE_CANCEL_PX = 10;
+  let pressTimer = null;
+  let longPressTriggered = false;
+  let startX = 0, startY = 0;
+
+  const clearPress = () => {
+    clearTimeout(pressTimer);
+    pressTimer = null;
+  };
+
+  btn.addEventListener('pointerdown', (e) => {
+    longPressTriggered = false;
+    startX = e.clientX;
+    startY = e.clientY;
+    pressTimer = setTimeout(() => {
+      longPressTriggered = true;
+      pressTimer = null;
+      toggleFavorite(s.id);
+      if (navigator.vibrate) navigator.vibrate(15);
+    }, LONG_PRESS_MS);
+  });
+
+  btn.addEventListener('pointermove', (e) => {
+    if (!pressTimer) return;
+    const dx = e.clientX - startX;
+    const dy = e.clientY - startY;
+    if (Math.sqrt(dx * dx + dy * dy) > MOVE_CANCEL_PX) clearPress();
+  });
+
+  btn.addEventListener('pointerup', clearPress);
+  btn.addEventListener('pointerleave', clearPress);
+  btn.addEventListener('pointercancel', clearPress);
+
+  btn.addEventListener('click', () => {
+    if (longPressTriggered) {
+      longPressTriggered = false;
+      return; // la presión larga ya gestionó el favorito, no reproducir/quitar sonido
+    }
+    toggleSound(s);
+  });
+
+  return btn;
+}
+
+// ── Construir slider de categorías + carrusel de páginas ──────────────────
+function buildLibrary() {
+  const slider = $('category-slider');
+  const pagesContainer = $('category-pages');
+  slider.innerHTML = '';
+  pagesContainer.innerHTML = '';
+  favoritesGridEl = null;
+
+  const categories = getCategories();
+
+  categories.forEach((cat, idx) => {
+    // Pastilla de categoría
+    const pill = document.createElement('button');
+    pill.className = 'category-pill' + (idx === 0 ? ' active' : '');
+    pill.type = 'button';
+    pill.textContent = cat;
+    pill.dataset.index = idx;
+    pill.addEventListener('click', () => scrollToCategory(idx));
+    slider.appendChild(pill);
+
+    // Página del carrusel para esta categoría
+    const page = document.createElement('div');
+    page.className = 'category-page';
+    page.dataset.index = idx;
+
+    const grid = document.createElement('div');
+    grid.className = 'sounds-grid';
+    grid.dataset.category = cat;
+
+    if (cat === 'Favoritos') {
+      favoritesGridEl = grid;
+    }
+
+    const filtered = cat === 'Favoritos'
+      ? sounds.filter(s => favorites.has(s.id))
+      : sounds.filter(s => s.category === cat);
+
+    if (cat === 'Favoritos' && filtered.length === 0) {
+      const empty = document.createElement('div');
+      empty.className = 'empty-state favorites-empty';
+      empty.innerHTML = `
+        <i class="ti ti-heart-off" aria-hidden="true"></i>
+        <span>Mantén presionado un sonido para agregarlo aquí</span>
+      `;
+      grid.appendChild(empty);
+    } else {
+      filtered.forEach(s => grid.appendChild(createSoundButton(s)));
+    }
+
+    page.appendChild(grid);
+    pagesContainer.appendChild(page);
+
+    initCustomScrollbarFor(grid, page);
+  });
+
+  // Sincronizar la pastilla activa cuando el usuario desliza el carrusel manualmente
+  pagesContainer.addEventListener('scroll', syncActivePillOnScroll, { passive: true });
+}
+
+// ── Ir a una categoría (por click en pastilla o programáticamente) ────────
+function scrollToCategory(idx) {
+  const pagesContainer = $('category-pages');
+  const page = pagesContainer.querySelector(`.category-page[data-index="${idx}"]`);
+  if (!page) return;
+  pagesContainer.scrollTo({ left: page.offsetLeft, behavior: 'smooth' });
+  setActivePill(idx);
+}
+
+let _scrollSyncRaf = null;
+function syncActivePillOnScroll() {
+  const pagesContainer = $('category-pages');
+  cancelAnimationFrame(_scrollSyncRaf);
+  _scrollSyncRaf = requestAnimationFrame(() => {
+    const idx = Math.round(pagesContainer.scrollLeft / pagesContainer.clientWidth);
+    setActivePill(idx);
+  });
+}
+
+function setActivePill(idx) {
+  document.querySelectorAll('.category-pill').forEach(p => {
+    p.classList.toggle('active', parseInt(p.dataset.index, 10) === idx);
+  });
+  const activePill = document.querySelector(`.category-pill[data-index="${idx}"]`);
+  if (activePill) {
+    activePill.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
+  }
 }
 
 // ── Cargar buffer de audio ────────────────────────────────────────────────
@@ -263,9 +486,12 @@ function removeSound(s) {
 }
 
 // ── Marcar círculo activo / inactivo ─────────────────────────────────────
+// Un mismo sonido puede aparecer tanto en "Todos" como en su página de
+// categoría, así que se actualizan todos los botones que lo representan.
 function markActive(id, active) {
-  const btn = $(`snd-${id}`);
-  if (btn) btn.classList.toggle('active', active);
+  document.querySelectorAll(`[data-sound-id="${id}"]`).forEach(btn => {
+    btn.classList.toggle('active', active);
+  });
 }
 
 // ── Crear tarjeta "Sonando ahora" ────────────────────────────────────────
@@ -340,12 +566,10 @@ style.textContent = `
 `;
 document.head.appendChild(style);
 
-// ── Scrollbar "fantasma" para la biblioteca ───────────────────────────────
-function initCustomScrollbar() {
-  const grid = $('sounds-grid');
-  const wrap = document.querySelector('.sounds-grid-wrap');
-  if (!grid || !wrap) return;
-
+// ── Scrollbar "fantasma" para una página de la biblioteca ─────────────────
+// Se instancia una vez por cada página del carrusel (una por categoría),
+// ya que cada una tiene su propio grid con scroll vertical independiente.
+function initCustomScrollbarFor(grid, wrap) {
   const thumb = document.createElement('div');
   thumb.className = 'custom-scrollbar-thumb';
   wrap.appendChild(thumb);
@@ -383,13 +607,12 @@ function initCustomScrollbar() {
 
 // ── Init ──────────────────────────────────────────────────────────────────
 document.addEventListener('DOMContentLoaded', () => {
-  buildGrid();
+  buildLibrary();
   updatePlayingCount();
   initRain();
   initOwl();
   initTimer();
   initMute();
-  initCustomScrollbar();
 });
 
 // ── ANIMACIÓN DEL BÚHO ───────────────────────────────────────────────────

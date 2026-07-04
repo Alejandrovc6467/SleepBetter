@@ -637,9 +637,76 @@ body {
   overflow: hidden;
 }
 
+/* ── SLIDER DE CATEGORÍAS ─────────────────────────────────────────────── */
+.category-slider {
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: row;
+  gap: .5rem;
+  padding: .1rem 1.25rem .8rem;
+  overflow-x: auto;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.category-slider::-webkit-scrollbar { display: none; }
+
+.category-pill {
+  flex-shrink: 0;
+  padding: .4rem .9rem;
+  border-radius: 20px;
+  border: 1px solid var(--border);
+  background: var(--card);
+  color: var(--text2);
+  font-size: .72rem;
+  font-weight: 500;
+  font-family: 'DM Sans', sans-serif;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: background .18s, border-color .18s, color .18s;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.category-pill:hover {
+  border-color: var(--border-hi);
+  color: var(--text);
+}
+
+.category-pill.active {
+  background: var(--accent-dim);
+  border-color: var(--accent);
+  color: var(--text);
+}
+
 .sounds-grid-wrap {
   position: relative;
   flex: 1;
+  overflow: hidden;
+}
+
+/* Carrusel horizontal de páginas por categoría */
+.category-pages {
+  display: flex;
+  width: 100%;
+  height: 100%;
+  overflow-x: auto;
+  overflow-y: hidden;
+  scroll-snap-type: x mandatory;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.category-pages::-webkit-scrollbar { display: none; }
+
+/* Cada página ocupa el 100% del ancho, mantiene 4 columnas dentro */
+.category-page {
+  flex: 0 0 100%;
+  width: 100%;
+  height: 100%;
+  min-width: 100%;
+  scroll-snap-align: start;
+  scroll-snap-stop: always;
+  position: relative;
   overflow: hidden;
 }
 
@@ -774,4 +841,44 @@ body {
   .sounds-grid {
     padding-bottom: calc(6rem + env(safe-area-inset-bottom));
   }
+}
+
+/* Estado vacío dentro de la página "Favoritos" */
+.favorites-empty {
+  grid-column: 1 / -1;
+}
+
+/* ── TOAST DE FAVORITOS ──────────────────────────────────────────────── */
+.fav-toast {
+  position: fixed;
+  left: 50%;
+  bottom: 28px;
+  transform: translate(-50%, 12px);
+  display: flex;
+  align-items: center;
+  gap: .45rem;
+  background: rgba(23,23,25,.94);
+  border: 1px solid rgba(255,255,255,.12);
+  color: var(--white);
+  font-size: .78rem;
+  font-weight: 500;
+  font-family: 'DM Sans', sans-serif;
+  padding: .6rem 1.1rem;
+  border-radius: 999px;
+  box-shadow: 0 8px 24px rgba(0,0,0,.4);
+  opacity: 0;
+  pointer-events: none;
+  white-space: nowrap;
+  transition: opacity .25s ease, transform .25s ease;
+  z-index: 200;
+}
+
+.fav-toast .ti {
+  font-size: 15px;
+  color: var(--danger);
+}
+
+.fav-toast.visible {
+  opacity: 1;
+  transform: translate(-50%, 0);
 }
