@@ -78,11 +78,22 @@ body {
   z-index: 10;
 }
 
+.hola{
+  height: 125px;
+  margin: 0.5rem;
+  padding: 1rem;
+  border-radius: 20px;
+  /* background-color: rgba(124, 124, 124, 0.277); */
+}
+
 /* ── HERO / WALLPAPER ─────────────────────────────────────────────────── */
 .hero {
+  margin: 0.5rem;
   z-index: 2;
   border-bottom-left-radius: 20px;
   border-bottom-right-radius: 20px;
+  border-top-left-radius: 20px;
+  border-top-right-radius: 20px;
   position: relative;
   height: 200px;
   overflow: hidden;
@@ -403,7 +414,7 @@ body {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: .7rem 1.25rem .45rem;
+  padding: .5rem 1rem;
 }
 
 .section-label {
@@ -438,12 +449,15 @@ body {
 .now-playing-section {
   position: relative;
   z-index: 1;
-  padding-top: 15px;
-  margin-top: -20px;
+  /* padding-top: 15px; */
+  /* margin-top: -20px; */
   background: var(--surface);
   padding-bottom: .5rem;
   border-bottom-left-radius: 20px;
   border-bottom-right-radius: 20px;
+  border-top-left-radius: 20px;
+  border-top-right-radius: 20px;
+  margin: 0.5rem;
 }
 
 .now-playing-list {

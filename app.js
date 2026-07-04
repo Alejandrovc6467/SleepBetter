@@ -14,6 +14,24 @@ const sounds = [
   { id: 'rio',     name: 'Río',      icon: 'ti-droplets',      file: 'audios/river.mp3',         loop: true,  category: 'Agua' },
   { id: 'lobo',    name: 'Lobo',     icon: 'ti-dog',           file: 'audios/wolf.mp3',          loop: false, category: 'Animales' },
   { id: 'universe',    name: 'Universo',     icon: 'ti-planet',         file: 'audios/universe.mp3',           loop: true, category: 'Espacio' },
+
+
+
+
+      { id: 'bosque',  name: 'Bosque',   icon: 'ti-trees',         file: 'audios/forest.mp3',        loop: true,  category: 'Naturaleza' },
+      { id: 'bosque',  name: 'Bosque',   icon: 'ti-trees',         file: 'audios/forest.mp3',        loop: true,  category: 'Naturaleza' },
+        { id: 'bosque',  name: 'Bosque',   icon: 'ti-trees',         file: 'audios/forest.mp3',        loop: true,  category: 'Naturaleza' },
+          { id: 'bosque',  name: 'Bosque',   icon: 'ti-trees',         file: 'audios/forest.mp3',        loop: true,  category: 'Naturaleza' },
+            { id: 'bosque',  name: 'Bosque',   icon: 'ti-trees',         file: 'audios/forest.mp3',        loop: true,  category: 'Naturaleza' },
+              { id: 'bosque',  name: 'Bosque',   icon: 'ti-trees',         file: 'audios/forest.mp3',        loop: true,  category: 'Naturaleza' },
+                { id: 'bosque',  name: 'Bosque',   icon: 'ti-trees',         file: 'audios/forest.mp3',        loop: true,  category: 'Naturaleza' },
+                  { id: 'bosque',  name: 'Bosque',   icon: 'ti-trees',         file: 'audios/forest.mp3',        loop: true,  category: 'Naturaleza' },
+                    { id: 'bosque',  name: 'Bosque',   icon: 'ti-trees',         file: 'audios/forest.mp3',        loop: true,  category: 'Naturaleza' },
+                      { id: 'bosque',  name: 'Bosque',   icon: 'ti-trees',         file: 'audios/forest.mp3',        loop: true,  category: 'Naturaleza' },
+                        { id: 'bosque',  name: 'Bosque',   icon: 'ti-trees',         file: 'audios/forest.mp3',        loop: true,  category: 'Naturaleza' },
+                          { id: 'bosque',  name: 'Bosque',   icon: 'ti-trees',         file: 'audios/forest.mp3',        loop: true,  category: 'Naturaleza' },
+
+
 ]
 
 // ── AudioContext compartido ───────────────────────────────────────────────
