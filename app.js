@@ -105,7 +105,7 @@ function showToast(message, icon = 'ti-heart') {
   clearTimeout(_toastTimeout);
   _toastTimeout = setTimeout(() => {
     toast.classList.remove('visible');
-  }, 1800);
+  }, 1300);
 }
 
 function updatePlayingCount() {
@@ -147,7 +147,7 @@ function createSoundButton(s) {
     <span class="sound-name">${s.name}</span>
   `;
 
-  const LONG_PRESS_MS = 2000;
+  const LONG_PRESS_MS = 1200;
   const MOVE_CANCEL_PX = 10;
   let pressTimer = null;
   let longPressTriggered = false;
