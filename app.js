@@ -1,20 +1,4 @@
-// ── Catálogo de sonidos ───────────────────────────────────────────────────
-// loop: true  → reproducción continua en bucle
-// loop: false → reproducción aleatoria (suena al activar, luego a intervalos random)
-// category: agrupa el sonido dentro del slider de categorías de la biblioteca
-const sounds = [
-  { id: 'lluvia',  name: 'Lluvia',   icon: 'ti-cloud-rain',    file: 'audios/lluvia-suave.wav',  loop: true,  category: 'Naturaleza' },
-  { id: 'viento',  name: 'Viento',   icon: 'ti-wind',          file: 'audios/viento-suave.wav',  loop: true,  category: 'Naturaleza' },
-  { id: 'trueno',  name: 'Trueno',   icon: 'ti-bolt',          file: 'audios/trueno2.wav',       loop: false, category: 'Naturaleza' },
-  { id: 'buho',    name: 'Búho',     icon: 'ti-feather',       file: 'audios/buho.mp3',          loop: false, category: 'Animales' },
-  { id: 'buho2',   name: 'Búho 2',   icon: 'ti-feather',       file: 'audios/buho2.mp3',         loop: false, category: 'Animales' },
-  { id: 'olas',    name: 'Olas',     icon: 'ti-ripple',        file: 'audios/olas.ogg',          loop: true,  category: 'Agua' },
-  { id: 'fogata',  name: 'Fogata',   icon: 'ti-flame',         file: 'audios/fogata.mp3',        loop: true,  category: 'Ambiente' },
-  { id: 'bosque',  name: 'Bosque',   icon: 'ti-trees',         file: 'audios/forest.mp3',        loop: true,  category: 'Naturaleza' },
-  { id: 'rio',     name: 'Río',      icon: 'ti-droplets',      file: 'audios/river.mp3',         loop: true,  category: 'Agua' },
-  { id: 'lobo',    name: 'Lobo',     icon: 'ti-dog',           file: 'audios/wolf.mp3',          loop: false, category: 'Animales' },
-  { id: 'universe',    name: 'Universo',     icon: 'ti-planet',         file: 'audios/universe.mp3',           loop: true, category: 'Espacio' },
-]
+import { sounds } from './sounds.js';
 
 // ── AudioContext compartido ───────────────────────────────────────────────
 let ctx = null;
@@ -71,7 +55,7 @@ function toggleFavorite(id) {
   renderFavoritesGrid();
   showToast(
     wasFav ? 'Eliminado de favoritos' : 'Agregado a favoritos',
-    wasFav ? 'ti-heart-off' : 'ti-heart'
+    wasFav ? 'fa-solid fa-heart-crack' : 'fa-solid fa-heart'
   );
 }
 
@@ -85,7 +69,7 @@ function renderFavoritesGrid() {
     const empty = document.createElement('div');
     empty.className = 'empty-state favorites-empty';
     empty.innerHTML = `
-      <i class="ti ti-heart-off" aria-hidden="true"></i>
+      <i class="fa-solid fa-heart-crack" aria-hidden="true"></i>
       <span>Mantén presionado un sonido para agregarlo aquí</span>
     `;
     favoritesGridEl.appendChild(empty);
@@ -97,10 +81,10 @@ function renderFavoritesGrid() {
 
 // ── Burbuja de aviso (toast) ───────────────────────────────────────────────
 let _toastTimeout = null;
-function showToast(message, icon = 'ti-heart') {
+function showToast(message, icon = 'fa-solid fa-heart') {
   const toast = $('fav-toast');
   if (!toast) return;
-  toast.innerHTML = `<i class="ti ${icon}" aria-hidden="true"></i><span>${message}</span>`;
+  toast.innerHTML = `<i class="${icon}" aria-hidden="true"></i><span>${message}</span>`;
   toast.classList.add('visible');
   clearTimeout(_toastTimeout);
   _toastTimeout = setTimeout(() => {
@@ -142,7 +126,7 @@ function createSoundButton(s) {
   btn.setAttribute('aria-label', s.name);
   btn.innerHTML = `
     <div class="sound-circle">
-      <i class="ti ${s.icon}" aria-hidden="true"></i>
+      <i class="${s.icon}" aria-hidden="true"></i>
     </div>
     <span class="sound-name">${s.name}</span>
   `;
@@ -233,7 +217,7 @@ function buildLibrary() {
       const empty = document.createElement('div');
       empty.className = 'empty-state favorites-empty';
       empty.innerHTML = `
-        <i class="ti ti-heart-off" aria-hidden="true"></i>
+        <i class="fa-solid fa-heart-crack" aria-hidden="true"></i>
         <span>Mantén presionado un sonido para agregarlo aquí</span>
       `;
       grid.appendChild(empty);
@@ -504,9 +488,9 @@ function addNowPlayingCard(s) {
 
   card.innerHTML = `
     <div class="np-icon-wrap">
-      <i class="ti ${s.icon}" aria-hidden="true"></i>
+      <i class="${s.icon}" aria-hidden="true"></i>
       <button class="np-remove" aria-label="Quitar ${s.name}">
-        <i class="ti ti-x" aria-hidden="true"></i>
+        <i class="fa-solid fa-xmark" aria-hidden="true"></i>
       </button>
     </div>
     <div class="np-info">
@@ -1092,7 +1076,7 @@ function toggleMute() {
 
   btn.classList.toggle('muted', isMuted);
   btn.setAttribute('aria-pressed', isMuted);
-  icon.className = isMuted ? 'ti ti-volume-off' : 'ti ti-volume';
+  icon.className = isMuted ? 'fa-solid fa-volume-xmark' : 'fa-solid fa-volume-high';
 
   Object.values(state).forEach(st => {
     if (st.gainNode) {
