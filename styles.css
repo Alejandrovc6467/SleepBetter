@@ -525,9 +525,12 @@ body {
   font-size: .63rem;
   font-weight: 500;
   color: var(--text2);
-  display: flex;
-  align-items: center;
+  display: block;
+  width: 100%;
   white-space: nowrap;
+  overflow: hidden;
+  position: relative;
+  text-align: center;
 }
 
 /* EQ animado en el header "Sonando ahora" */
@@ -812,6 +815,7 @@ body {
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  position: relative;
 }
 
 .sound-btn.active .sound-name {
@@ -876,4 +880,30 @@ body {
 .fav-toast.visible {
   opacity: 1;
   transform: translate(-50%, 0);
+}
+
+/* ── MARQUEE: nombres largos que se desbordan ──────────────────────────── */
+.marquee-track {
+  display: inline-flex;
+  white-space: nowrap;
+}
+
+.marquee-text {
+  display: inline-block;
+  white-space: nowrap;
+}
+
+.sound-name.is-overflowing,
+.np-name.is-overflowing {
+  text-align: left;
+}
+
+.sound-name.is-overflowing .marquee-track,
+.np-name.is-overflowing .marquee-track {
+  animation: marquee-loop var(--marquee-duration, 8s) linear infinite;
+}
+
+@keyframes marquee-loop {
+  from { transform: translateX(0); }
+  to   { transform: translateX(var(--marquee-shift, 0)); }
 }

@@ -128,8 +128,10 @@ function createSoundButton(s) {
     <div class="sound-circle">
       <i class="${s.icon}" aria-hidden="true"></i>
     </div>
-    <span class="sound-name">${s.name}</span>
+    <span class="sound-name"><span class="marquee-track"><span class="marquee-text">${s.name}</span></span></span>
   `;
+
+  setupMarquee(btn.querySelector('.sound-name'));
 
   const LONG_PRESS_MS = 1200;
   const MOVE_CANCEL_PX = 10;
@@ -494,7 +496,7 @@ function addNowPlayingCard(s) {
       </button>
     </div>
     <div class="np-info">
-      <div class="np-name">${s.name}</div>
+      <div class="np-name"><span class="marquee-track"><span class="marquee-text">${s.name}</span></span></div>
       <div class="np-vol-row">
         <input
           type="range"
@@ -523,6 +525,8 @@ function addNowPlayingCard(s) {
   // Botón quitar
   card.querySelector('.np-remove').addEventListener('click', () => removeSound(s));
 
+  setupMarquee(card.querySelector('.np-name'));
+
   // El sonido recién activado aparece primero (izquierda)
   list.insertBefore(card, list.firstChild);
 }
@@ -533,6 +537,44 @@ function removeNowPlayingCard(id) {
     card.style.animation = 'slideOut .2s ease forwards';
     setTimeout(() => card.remove(), 200);
   }
+}
+
+// ── Marquee de texto para nombres largos ──────────────────────────────────
+// Si el texto es más ancho que su contenedor, se duplica y se desliza en
+// bucle continuo hacia un solo lado (sin volver al inicio); si no, queda
+// estático y centrado.
+function setupMarquee(container) {
+  if (!container) return;
+  const track = container.querySelector('.marquee-track');
+  if (!track) return;
+
+  // Reiniciar: dejar solo la copia original del texto
+  const copies = track.querySelectorAll('.marquee-text');
+  copies.forEach((el, i) => { if (i > 0) el.remove(); });
+
+  container.classList.remove('is-overflowing');
+  container.style.removeProperty('--marquee-shift');
+  container.style.removeProperty('--marquee-duration');
+
+  requestAnimationFrame(() => {
+    const original = track.querySelector('.marquee-text');
+    if (!original) return;
+    const overflow = original.scrollWidth - container.clientWidth;
+    if (overflow > 2) {
+      const gap = 28; // espacio entre la copia original y la duplicada
+      const clone = original.cloneNode(true);
+      clone.style.marginLeft = `${gap}px`;
+      track.appendChild(clone);
+
+      const shift = original.scrollWidth + gap;
+      const PX_PER_SECOND = 16; // velocidad lenta y constante
+      const duration = Math.max(shift / PX_PER_SECOND, 6);
+
+      container.style.setProperty('--marquee-shift', `-${shift}px`);
+      container.style.setProperty('--marquee-duration', `${duration}s`);
+      container.classList.add('is-overflowing');
+    }
+  });
 }
 
 function setSliderFill(slider, val) {
