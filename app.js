@@ -450,7 +450,7 @@ async function toggleSound(s) {
     markActive(s.id, true);
     addNowPlayingCard(s);
     updatePlayingCount();
-    if (s.id === 'lluvia') rain.start();
+    if (s.category === 'Lluvia') rain.start();
     if (s.id === 'buho' || s.id === 'buho2') owl.arrive();
   }
 }
@@ -463,7 +463,10 @@ function removeSound(s) {
   markActive(s.id, false);
   removeNowPlayingCard(s.id);
   updatePlayingCount();
-  if (s.id === 'lluvia') rain.stop();
+  if (s.category === 'Lluvia') {
+    const anyRainPlaying = sounds.some(x => x.category === 'Lluvia' && state[x.id] && state[x.id].playing);
+    if (!anyRainPlaying) rain.stop();
+  }
   if (s.id === 'buho' || s.id === 'buho2') {
     // Solo retirar si el otro búho tampoco está activo
     const otherOwl = s.id === 'buho' ? 'buho2' : 'buho';
