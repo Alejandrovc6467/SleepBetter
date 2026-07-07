@@ -51,7 +51,7 @@ export const sounds = [
 
 
   { id: 'sound_airplane_interior',    name: 'Avión',     icon: 'fa-solid fa-plane',         file: 'audios/sound_airplane_interior.ogg',           loop: true, category: 'Ciudad' },
-  { id: 'sound_car_interior',    name: 'Automovil',     icon: 'fa-solid fa-car',         file: 'audios/sound_car_interior.ogg',           loop: true, category: 'Ciudad' },
+  { id: 'sound_car_interior',    name: 'Automóvil',     icon: 'fa-solid fa-car',         file: 'audios/sound_car_interior.ogg',           loop: true, category: 'Ciudad' },
   { id: 'sound_train_interior',    name: 'Tren',     icon: 'fa-solid fa-train',         file: 'audios/sound_train_interior.ogg',           loop: true, category: 'Ciudad' },
   { id: 'sound_train_station',    name: 'Estación de tren',     icon: 'fa-solid fa-train',         file: 'audios/sound_train_station.ogg',           loop: true, category: 'Ciudad' },
 

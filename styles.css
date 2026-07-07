@@ -248,41 +248,47 @@ body {
   inset: 0;
   z-index: 100;
   display: flex;
-  align-items: center;
+  align-items: end;
   justify-content: center;
   /* background: rgba(0, 0, 0, 0.45); */
   /* backdrop-filter: blur(2px); */
   /* -webkit-backdrop-filter: blur(8px); */
-  opacity: 0;
   pointer-events: none;
-  transition: opacity .2s ease;
-  padding: 0 1.5rem;
+  /* padding: 0 1.5rem; */
 }
 
 .timer-modal-overlay.open {
-  opacity: 1;
   pointer-events: all;
 }
 
+/* El modal vive fuera de la pantalla (abajo) y sube deslizándose al abrir;
+   al cerrar (o al elegir una opción) vuelve a bajar y se esconde ahí mismo */
 .timer-modal {
   width: 100%;
-  max-width: 340px;
-  transform: scale(.96) translateY(8px);
-  transition: transform .25s ease;
-  background: rgba(41, 47, 70, 0.568);
+  /* max-width: 600px; */
+  transform: translateY(100%);
+  transition: transform .80s cubic-bezier(.22, .61, .36, 1);
+  background: rgba(66, 66, 66, 0.123);
   backdrop-filter: blur(15px);
   -webkit-backdrop-filter: blur(15px);
-  border: 1px solid rgba(255,255,255,.18);
   border-radius: var(--radius-md);
-  padding: .5rem .65rem;
- 
+  border-bottom-left-radius: 0;
+  border-bottom-right-radius: 0;
+  padding: 1.5rem 1rem;
+  margin: 0 .7rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
 }
 
 .timer-modal-overlay.open .timer-modal {
-  transform: scale(1) translateY(0);
+  transform: translateY(0);
 }
 
 .timer-modal-header {
+  width: 100%;
+  max-width: 600px;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -300,11 +306,10 @@ body {
 .timer-modal-close {
   width: 26px;
   height: 26px;
-  border-radius: 50%;
-  border: 1px solid rgba(255,255,255,.15);
-  background: rgba(255,255,255,.08);
+  border:none;
+  background: transparent;
   color: var(--white);
-  font-size: 13px;
+  font-size: 18px;
   cursor: pointer;
   display: flex;
   align-items: center;
@@ -319,17 +324,20 @@ body {
 }
 
 .timer-options {
+  width: 100%;
   display: flex;
   flex-direction: column;
   gap: .45rem;
+  max-width: 600px;
 }
 
 .timer-option {
   width: 100%;
   padding: .7rem;
   border-radius: var(--radius-md);
-  border: 1px solid rgba(255,255,255,.1);
-  background: rgba(255,255,255,.07);
+  border: none;
+  /* background: rgba(255,255,255,.07); */
+  background: rgba(255, 255, 255, 0.041);
   color: var(--white);
   font-size: .9rem;
   font-weight: 400;
@@ -347,6 +355,7 @@ body {
 
 /* Botón detener temporizador */
 .timer-stop {
+  max-width: 600px;
   display: flex;
   align-items: center;
   justify-content: center;

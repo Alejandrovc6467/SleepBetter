@@ -1021,6 +1021,7 @@ function initTimer() {
 
   btn.addEventListener('click', () => {
     updateStopBtn();
+    // El modal sube deslizándose desde abajo
     overlay.classList.add('open');
     overlay.setAttribute('aria-hidden', 'false');
   });
@@ -1030,6 +1031,8 @@ function initTimer() {
     if (e.target === overlay) closeTimerModal();
   });
 
+  // Al presionar una opción, el temporizador arranca al instante y el
+  // modal se esconde deslizándose hacia abajo (sin pasos extra).
   options.forEach(opt => {
     opt.addEventListener('click', () => {
       const minutes = parseInt(opt.dataset.minutes);
