@@ -879,10 +879,52 @@ body {
   }
 }
 
-/* Estado vacío dentro de la página "Favoritos" */
+/* Estado vacío dentro de la página "Favoritos" (ya no se usa para el
+   mensaje de ayuda, que ahora vive en .fav-hint, pero se mantiene por si
+   se necesita en el futuro) */
 .favorites-empty {
   grid-column: 1 / -1;
 }
+
+/* ── BURBUJA DE AYUDA: página "Favoritos" ──────────────────────────────── */
+/* Vive como último elemento DENTRO del grid de Favoritos, ocupando todas
+   las columnas, para que aparezca justo después de la última fila de
+   sonidos (haya o no favoritos) y se desplace con el contenido al hacer
+   scroll. Su sombra le da un efecto "flotante" sobre los ítems de arriba. */
+.fav-hint {
+  grid-column: 1 / -1;
+  justify-self: center;
+  align-self: start;
+  margin-top: .25rem;
+  display: flex;
+  align-items: center;
+  gap: .45rem;
+  max-width: 100%;
+  /* background: rgba(23,23,25,.94); */
+  /* border: 1px solid rgba(255,255,255,.12); */
+  color: var(--muted);
+  font-size: .7rem;
+  font-weight: 200;
+  font-family: 'DM Sans', sans-serif;
+  padding: .55rem .5rem;
+  border-radius: 999px;
+  box-shadow: 0 8px 24px rgba(0,0,0,.4);
+  text-align: center;
+  margin-top: 1rem;
+}
+
+.fav-hint i {
+  font-size: 10px;
+  color: var(--danger);
+  flex-shrink: 0;
+}
+
+.fav-hint span {
+  /* white-space: nowrap; */
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
 
 /* ── TOAST DE FAVORITOS ──────────────────────────────────────────────── */
 .fav-toast {

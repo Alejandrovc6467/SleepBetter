@@ -59,24 +59,27 @@ function toggleFavorite(id) {
   );
 }
 
+// Crea la burbuja de ayuda que siempre aparece justo después de la última
+// fila de sonidos dentro del grid de Favoritos (flota sobre el contenido
+// gracias a su sombra, pero sigue el flujo normal del grid).
+function createFavHint() {
+  const hint = document.createElement('div');
+  hint.className = 'fav-hint';
+  hint.innerHTML = `
+    <span>Mantén presionado un sonido para agregarlo o eliminarlo de Favoritos</span>
+  `;
+  return hint;
+}
+
+// Vuelve a pintar los botones del grid de Favoritos y reinserta la burbuja
+// de ayuda al final, para que siempre quede justo después de la última fila.
 function renderFavoritesGrid() {
   if (!favoritesGridEl) return;
   favoritesGridEl.innerHTML = '';
 
   const filtered = sounds.filter(s => favorites.has(s.id));
-
-  if (filtered.length === 0) {
-    const empty = document.createElement('div');
-    empty.className = 'empty-state favorites-empty';
-    empty.innerHTML = `
-      <i class="fa-solid fa-heart-crack" aria-hidden="true"></i>
-      <span>Mantén presionado un sonido para agregarlo aquí</span>
-    `;
-    favoritesGridEl.appendChild(empty);
-    return;
-  }
-
   filtered.forEach(s => favoritesGridEl.appendChild(createSoundButton(s)));
+  favoritesGridEl.appendChild(createFavHint());
 }
 
 // ── Burbuja de aviso (toast) ───────────────────────────────────────────────
@@ -95,9 +98,20 @@ function showToast(message, icon = 'fa-solid fa-heart') {
 function updatePlayingCount() {
   const count = Object.values(state).filter(s => s.playing).length;
   $('playing-count').textContent = count;
-  $('empty-state').style.display = count === 0 ? 'flex' : 'none';
   const eq = $('eq-header');
   if (eq) eq.classList.toggle('active', count > 0);
+}
+
+// Muestra/oculta "Ningún sonido activo" según si realmente quedan tarjetas
+// en el DOM de "Sonando ahora" (no según el conteo de sonidos reproduciéndose).
+// Esto evita que el mensaje aparezca por un instante mientras la última
+// tarjeta todavía se está animando hacia afuera (slideOut, 200ms), que es
+// lo que provocaba el salto visual hacia el centro antes de acomodarse
+// a la izquierda.
+function refreshEmptyState() {
+  const list = $('now-playing-list');
+  const hasCards = !!list.querySelector('.np-card');
+  $('empty-state').style.display = hasCards ? 'none' : 'flex';
 }
 
 // ── Categorías ────────────────────────────────────────────────────────────
@@ -215,16 +229,13 @@ function buildLibrary() {
       ? sounds.filter(s => favorites.has(s.id))
       : sounds.filter(s => s.category === cat);
 
-    if (cat === 'Favoritos' && filtered.length === 0) {
-      const empty = document.createElement('div');
-      empty.className = 'empty-state favorites-empty';
-      empty.innerHTML = `
-        <i class="fa-solid fa-heart-crack" aria-hidden="true"></i>
-        <span>Mantén presionado un sonido para agregarlo aquí</span>
-      `;
-      grid.appendChild(empty);
-    } else {
-      filtered.forEach(s => grid.appendChild(createSoundButton(s)));
+    filtered.forEach(s => grid.appendChild(createSoundButton(s)));
+
+    // Burbuja de ayuda: va DENTRO del grid como último elemento, así
+    // siempre queda justo después de la última fila de sonidos (haya o no
+    // favoritos) y se desplaza junto con el contenido al hacer scroll.
+    if (cat === 'Favoritos') {
+      grid.appendChild(createFavHint());
     }
 
     page.appendChild(grid);
@@ -532,13 +543,19 @@ function addNowPlayingCard(s) {
 
   // El sonido recién activado aparece primero (izquierda)
   list.insertBefore(card, list.firstChild);
+  refreshEmptyState();
 }
 
 function removeNowPlayingCard(id) {
   const card = $(`np-${id}`);
   if (card) {
     card.style.animation = 'slideOut .2s ease forwards';
-    setTimeout(() => card.remove(), 200);
+    setTimeout(() => {
+      card.remove();
+      refreshEmptyState();
+    }, 200);
+  } else {
+    refreshEmptyState();
   }
 }
 
@@ -638,6 +655,7 @@ function initCustomScrollbarFor(grid, wrap) {
 document.addEventListener('DOMContentLoaded', () => {
   buildLibrary();
   updatePlayingCount();
+  refreshEmptyState();
   initRain();
   initOwl();
   initTimer();
