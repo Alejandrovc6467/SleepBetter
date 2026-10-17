@@ -56,10 +56,13 @@ export const sounds = [
   { id: 'sound_train_station',    name: 'Estación de tren',     icon: 'fa-solid fa-train',         file: 'audios/sound_train_station.ogg',           loop: true, category: 'Ciudad' },
 
   
-  { id: 'sound_brown_noise',    name: 'Ruido de marrón',     icon: 'fa-solid fa-wave-square',         file: 'audios/sound_brown_noise.ogg',           loop: true, category: 'Otros' },
-  { id: 'sound_pink_noise',    name: 'Ruido rosa',     icon: 'fa-solid fa-wave-square',         file: 'audios/sound_pink_noise.ogg',           loop: true, category: 'Otros' },
-  { id: 'sound_green_noise',    name: 'Ruido verde',     icon: 'fa-solid fa-wave-square',         file: 'audios/sound_green_noise.ogg',           loop: true, category: 'Otros' },
-  { id: 'sound_white_noise',    name: 'Ruido blanco',     icon: 'fa-solid fa-wave-square',         file: 'audios/sound_white_noise.ogg',           loop: true, category: 'Otros' },
+  { id: 'memories',    name: 'Memories',     icon: 'fa-solid fa-music',         file: 'audios/memories.mp3',           loop: true, category: 'Otros' },
+  { id: 'in_another_life',    name: 'In another life',     icon: 'fa-solid fa-music',         file: 'audios/in_another_life.mp3',           loop: true, category: 'Otros' },
+  { id: 'instrumental_slowed',    name: 'Instrumental slowed',     icon: 'fa-solid fa-music',         file: 'audios/instrumental_slowed.mp3',           loop: true, category: 'Otros' },
+  { id: 'jacob_and_the_stone',    name: 'Jacob and the stone',     icon: 'fa-solid fa-music',         file: 'audios/jacob_and_the_stone.mp3',           loop: true, category: 'Otros' },
+  { id: 'new_york',    name: 'New York',     icon: 'fa-solid fa-music',         file: 'audios/new_york.mp3',           loop: true, category: 'Otros' },
+  { id: 'pachka_sigaret',    name: 'Pachka sigaret',     icon: 'fa-solid fa-music',         file: 'audios/pachka_sigaret.mp3',           loop: true, category: 'Otros' },
+  { id: 'snowfall',    name: 'Snowfall',     icon: 'fa-solid fa-music',         file: 'audios/snowfall.mp3',           loop: true, category: 'Otros' },
 
 
 
