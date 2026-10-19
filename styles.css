@@ -213,8 +213,16 @@ body {
   border-color: rgba(255,255,255,.35);
 }
 
-/* Botón mute */
-.mute-toggle {
+/* Botones de la esquina: instalar app + mute (mismo estilo) */
+.hero-actions {
+  display: flex;
+  flex-direction: row;
+  align-items: flex-start;
+  gap: .5rem;
+}
+
+.mute-toggle,
+.install-toggle {
   width: 44px;
   height: 26px;
   border-radius: 13px;
@@ -238,8 +246,20 @@ body {
   color: var(--danger);
 }
 
-.mute-toggle:hover {
+.mute-toggle:hover,
+.install-toggle:hover {
   background: rgba(255,255,255,.18);
+}
+
+/* Ya instalada (abierta como app) o recién instalada: no hay nada que instalar */
+.install-toggle[hidden] {
+  display: none;
+}
+
+@media (display-mode: standalone) {
+  .install-toggle {
+    display: none;
+  }
 }
 
 /* ── MODAL TEMPORIZADOR ──────────────────────────────────────────────── */
@@ -409,6 +429,333 @@ body {
 .timer-stop:disabled {
   opacity: .35;
   cursor: not-allowed;
+}
+
+/* ── MODAL INSTALAR APP ──────────────────────────────────────────────── */
+/* Mismo comportamiento que el modal del temporizador: vive fuera de la
+   pantalla (abajo) y sube deslizándose al abrir */
+.install-modal-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  display: flex;
+  align-items: end;
+  justify-content: center;
+  pointer-events: none;
+}
+
+.install-modal-overlay.open {
+  pointer-events: all;
+}
+
+.install-modal {
+  width: 100%;
+  max-height: 90vh;
+  max-height: 90dvh;
+  overflow-y: auto;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  transform: translateY(100%);
+  transition: transform .80s cubic-bezier(.22, .61, .36, 1);
+  background: var(--card-active);
+  border-radius: var(--radius-md);
+  border-bottom-left-radius: 0;
+  border-bottom-right-radius: 0;
+  padding: 1.5rem 1rem;
+  padding-bottom: max(1.5rem, env(safe-area-inset-bottom));
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.install-modal::-webkit-scrollbar {
+  display: none;
+}
+
+.install-modal-overlay.open .install-modal {
+  transform: translateY(0);
+}
+
+.install-content {
+  width: 100%;
+  max-width: 600px;
+}
+
+.install-modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1rem;
+}
+
+.install-modal-title {
+  font-size: .75rem;
+  font-weight: 500;
+  color: var(--white);
+  letter-spacing: .08em;
+  padding-left: 10px;
+}
+
+.install-modal-close {
+  width: 26px;
+  height: 26px;
+  border: none;
+  background: transparent;
+  color: var(--white);
+  font-size: 18px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background .15s, color .15s;
+}
+
+.install-modal-close:hover {
+  background: rgba(255,107,122,.15);
+  color: var(--danger);
+}
+
+/* Encabezado: ilustración animada del teléfono + textos */
+.install-head {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.install-illus {
+  width: 88px;
+  height: 116px;
+  flex-shrink: 0;
+  border-radius: var(--radius-md);
+  background-color: var(--card);
+  background-image: repeating-linear-gradient(135deg, rgba(255,255,255,.03) 0 8px, transparent 8px 16px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.install-phone {
+  position: relative;
+  width: 58px;
+  height: 92px;
+  border: 2.5px solid var(--text2);
+  border-radius: 11px;
+  background: var(--bg);
+  padding: 7px 6px;
+  box-shadow: 0 6px 16px rgba(0,0,0,.4);
+}
+
+.install-screen {
+  position: relative;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.install-line {
+  height: 4px;
+  border-radius: 2px;
+  background: rgba(255,255,255,.1);
+}
+
+.install-line--head {
+  height: 6px;
+  border-radius: 3px;
+  background: rgba(255,255,255,.16);
+}
+
+.install-line--short {
+  width: 60%;
+}
+
+/* Menú que aparece sobre la pantalla del teléfono */
+.install-sheet {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 5px;
+  border-radius: 8px;
+  background: var(--card-active);
+  border: 1px solid var(--border-hi);
+  box-shadow: 0 5px 12px rgba(0,0,0,.5);
+  opacity: 0;
+  transform: translateY(6px);
+}
+
+.install-sheet-row {
+  height: 8px;
+  border-radius: 4px;
+  background: rgba(255,255,255,.1);
+}
+
+.install-sheet-hl {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  height: 12px;
+  padding: 0 4px;
+  border-radius: 4px;
+  background: rgba(255,255,255,.14);
+}
+
+.install-sheet-plus {
+  font-size: 9px;
+  font-weight: 700;
+  line-height: 1;
+  color: #7c9cff;
+}
+
+.install-sheet-bar {
+  display: block;
+  flex: 1;
+  height: 4px;
+  border-radius: 2px;
+  background: rgba(124,156,255,.5);
+}
+
+.install-tap {
+  position: absolute;
+  right: 7px;
+  top: 9px;
+  width: 13px;
+  height: 13px;
+  border-radius: 50%;
+  background: rgba(124,156,255,.4);
+  opacity: 0;
+}
+
+/* La animación solo corre con el modal abierto (y arranca desde cero cada vez) */
+.install-modal-overlay.open .install-sheet    { animation: installMenu 6s ease-in-out infinite; }
+.install-modal-overlay.open .install-sheet-hl { animation: installHl 6s ease-in-out infinite; }
+.install-modal-overlay.open .install-tap      { animation: installTap 6s ease-in-out infinite; }
+
+@keyframes installTap  { 0%,8% { opacity: 0; transform: scale(.6); } 14% { opacity: 1; transform: scale(1); } 30%,100% { opacity: 0; transform: scale(1.5); } }
+@keyframes installMenu { 0%,14% { opacity: 0; transform: translateY(6px); } 22%,78% { opacity: 1; transform: translateY(0); } 88%,100% { opacity: 0; transform: translateY(6px); } }
+@keyframes installHl   { 0%,38% { background: rgba(255,255,255,.14); } 46%,74% { background: rgba(124,156,255,.3); } 84%,100% { background: rgba(255,255,255,.14); } }
+
+.install-text {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: .45rem;
+}
+
+.install-title {
+  font-size: 1.05rem;
+  font-weight: 500;
+  color: var(--white);
+  letter-spacing: -.01em;
+  line-height: 1.25;
+  text-wrap: pretty;
+}
+
+.install-sub {
+  font-size: .8rem;
+  line-height: 1.45;
+  color: var(--text2);
+  text-wrap: pretty;
+}
+
+/* Selector iPhone / Android */
+.install-os {
+  display: flex;
+  gap: 4px;
+  margin: 1.1rem 0 1rem;
+  padding: 4px;
+  border-radius: 999px;
+  background: var(--card);
+}
+
+.install-os-btn {
+  flex: 1;
+  padding: .65rem .6rem;
+  border: none;
+  border-radius: 999px;
+  background: transparent;
+  color: var(--text2);
+  font-family: 'DM Sans', sans-serif;
+  font-size: .82rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background .18s, color .18s;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.install-os-btn.active {
+  background: var(--accent);
+  color: var(--white);
+}
+
+/* Pasos + botón de instalar */
+.install-steps {
+  display: flex;
+  flex-direction: column;
+  gap: .8rem;
+}
+
+.install-now {
+  width: 100%;
+  padding: .75rem;
+  margin-bottom: .35rem;
+  border: none;
+  border-radius: var(--radius-md);
+  background: var(--accent);
+  color: var(--white);
+  font-family: 'DM Sans', sans-serif;
+  font-size: .85rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: filter .15s, transform .15s;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.install-now:hover {
+  filter: brightness(1.12);
+}
+
+.install-now:active {
+  transform: scale(.98);
+}
+
+.install-step {
+  display: flex;
+  align-items: center;
+  gap: .7rem;
+}
+
+.install-step[hidden] {
+  display: none;
+}
+
+.install-step-n {
+  width: 22px;
+  height: 22px;
+  flex-shrink: 0;
+  border-radius: 50%;
+  background: var(--accent-dim);
+  color: #7c9cff;
+  font-size: .7rem;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.install-step-text {
+  font-size: .85rem;
+  line-height: 1.4;
+  color: var(--text);
+}
+
+.install-step-text strong {
+  font-weight: 600;
+  color: var(--white);
 }
 
 .hero-icon {

@@ -26,7 +26,7 @@
         <canvas id="rain-canvas"></canvas>
       </div>
       <div class="hero-content">
-        <!-- Controles izquierda: temporizador + mute -->
+        <!-- Controles: temporizador (izquierda) + instalar app y mute (derecha) -->
         <div class="hero-controls">
           <!-- Temporizador -->
           <div class="timer-widget" id="timer-widget">
@@ -39,10 +39,16 @@
               <i class="fa-regular fa-clock" aria-hidden="true"></i>
             </button>
           </div>
-          <!-- Mute -->
-          <button class="mute-toggle" id="mute-toggle" aria-label="Silenciar todos los sonidos" aria-pressed="false">
-            <i class="fa-solid fa-volume-high" aria-hidden="true" id="mute-icon"></i>
-          </button>
+          <div class="hero-actions">
+            <!-- Instalar app (PWA) -->
+            <button class="install-toggle" id="install-toggle" aria-label="Instalar la app" aria-haspopup="dialog">
+              <i class="fa-solid fa-download" aria-hidden="true"></i>
+            </button>
+            <!-- Mute -->
+            <button class="mute-toggle" id="mute-toggle" aria-label="Silenciar todos los sonidos" aria-pressed="false">
+              <i class="fa-solid fa-volume-high" aria-hidden="true" id="mute-icon"></i>
+            </button>
+          </div>
         </div>
 
         <div class="my-name">
@@ -126,6 +132,83 @@
         <i class="fa-solid fa-stop" aria-hidden="true"></i>
         Detener temporizador
       </button>
+    </div>
+  </div>
+
+  <!-- Modal instalar app (PWA): indicaciones para guardarla en la pantalla de inicio -->
+  <div class="install-modal-overlay" id="install-modal-overlay" aria-hidden="true" inert>
+    <div class="install-modal" role="dialog" aria-label="Instalar la app">
+      <div class="install-content">
+        <div class="install-modal-header">
+          <div class="install-modal-title">Instalar app</div>
+          <button class="install-modal-close" id="install-modal-close" aria-label="Cerrar">
+            <i class="fa-solid fa-xmark" aria-hidden="true"></i>
+          </button>
+        </div>
+
+        <!-- Ilustración animada del teléfono + textos -->
+        <div class="install-head">
+          <div class="install-illus" aria-hidden="true">
+            <div class="install-phone">
+              <div class="install-screen">
+                <div class="install-line install-line--head"></div>
+                <div class="install-line"></div>
+                <div class="install-line install-line--short"></div>
+                <div class="install-sheet">
+                  <div class="install-sheet-row"></div>
+                  <div class="install-sheet-hl">
+                    <span class="install-sheet-plus">+</span>
+                    <span class="install-sheet-bar"></span>
+                  </div>
+                  <div class="install-sheet-row"></div>
+                </div>
+              </div>
+              <div class="install-tap"></div>
+            </div>
+          </div>
+          <div class="install-text">
+            <div class="install-title">Guarda la app en tu pantalla de inicio</div>
+            <div class="install-sub">Se abre como una app, sin buscar el enlace cada vez.</div>
+          </div>
+        </div>
+
+        <!-- Selector iPhone / Android -->
+        <div class="install-os">
+          <button type="button" class="install-os-btn active" data-os="iphone" aria-pressed="true">iPhone</button>
+          <button type="button" class="install-os-btn" data-os="android" aria-pressed="false">Android</button>
+        </div>
+
+        <!-- Pasos (el botón solo aparece en Android cuando el navegador ofrece instalar) -->
+        <div class="install-steps">
+          <button type="button" class="install-now" id="install-now" hidden>Instalar app ahora</button>
+
+          <div class="install-step" data-os="iphone">
+            <span class="install-step-n">1</span>
+            <div class="install-step-text">Toca <strong>Compartir</strong> en la barra de Safari.</div>
+          </div>
+          <div class="install-step" data-os="iphone">
+            <span class="install-step-n">2</span>
+            <div class="install-step-text">Elige <strong>Añadir a pantalla de inicio</strong>.</div>
+          </div>
+          <div class="install-step" data-os="iphone">
+            <span class="install-step-n">3</span>
+            <div class="install-step-text">Confirma con <strong>Añadir</strong>.</div>
+          </div>
+
+          <div class="install-step" data-os="android" hidden>
+            <span class="install-step-n">1</span>
+            <div class="install-step-text">Toca el <strong>menú ⋮</strong> de Chrome.</div>
+          </div>
+          <div class="install-step" data-os="android" hidden>
+            <span class="install-step-n">2</span>
+            <div class="install-step-text">Elige <strong>Añadir a pantalla principal</strong>.</div>
+          </div>
+          <div class="install-step" data-os="android" hidden>
+            <span class="install-step-n">3</span>
+            <div class="install-step-text">Confirma con <strong>Instalar</strong>.</div>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 

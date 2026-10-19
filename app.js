@@ -660,6 +660,8 @@ document.addEventListener('DOMContentLoaded', () => {
   initOwl();
   initTimer();
   initMute();
+  initInstall();
+  initUpdates();
 });
 
 // ── ANIMACIÓN DEL BÚHO ───────────────────────────────────────────────────
@@ -1148,5 +1150,141 @@ function toggleMute() {
     if (st.gainNode) {
       st.gainNode.gain.value = isMuted ? 0 : st.volume;
     }
+  });
+}
+
+
+// ── INSTALAR APP (PWA) ────────────────────────────────────────────────────
+// El botón del hero abre un modal con las indicaciones para guardar la app en
+// la pantalla de inicio (iPhone / Android). Si el navegador ofrece instalarla
+// directamente (Chrome/Android), el modal suma el botón "Instalar app ahora".
+const INSTALL_OS_KEY = 'sleepbetter:install-os';
+let installPrompt = null;  // evento beforeinstallprompt, guardado para dispararlo desde el modal
+let installOs = 'iphone';  // pestaña activa del modal: 'iphone' | 'android'
+
+// Se registran de inmediato (no en DOMContentLoaded) para no perder el evento
+window.addEventListener('beforeinstallprompt', e => {
+  e.preventDefault(); // sin mini-barra automática: la instalación se ofrece desde el modal
+  installPrompt = e;
+  renderInstall();
+});
+
+window.addEventListener('appinstalled', () => {
+  installPrompt = null;
+  closeInstallModal();
+  const toggle = $('install-toggle');
+  if (toggle) toggle.hidden = true; // ya está instalada: el botón sobra
+});
+
+// Sin una elección guardada, se muestra la pestaña del dispositivo que se usa
+function detectInstallOs() {
+  const isIos = /iphone|ipad|ipod/i.test(navigator.userAgent) ||
+    (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1); // iPad en modo escritorio
+  return isIos ? 'iphone' : 'android';
+}
+
+function loadInstallOs() {
+  try {
+    const saved = localStorage.getItem(INSTALL_OS_KEY);
+    if (saved === 'iphone' || saved === 'android') return saved;
+  } catch (e) { /* sin almacenamiento: se usa la detección */ }
+  return detectInstallOs();
+}
+
+function renderInstall() {
+  document.querySelectorAll('.install-os-btn').forEach(b => {
+    const active = b.dataset.os === installOs;
+    b.classList.toggle('active', active);
+    b.setAttribute('aria-pressed', String(active));
+  });
+  document.querySelectorAll('.install-step').forEach(s => {
+    s.hidden = s.dataset.os !== installOs;
+  });
+  // "Instalar app ahora" solo en Android y cuando el navegador ofreció la instalación
+  const installNow = $('install-now');
+  if (installNow) installNow.hidden = !(installOs === 'android' && installPrompt);
+}
+
+function openInstallModal() {
+  const overlay = $('install-modal-overlay');
+  overlay.inert = false;
+  // El modal sube deslizándose desde abajo
+  overlay.classList.add('open');
+  overlay.setAttribute('aria-hidden', 'false');
+}
+
+function closeInstallModal() {
+  const overlay = $('install-modal-overlay');
+  if (!overlay) return;
+  overlay.classList.remove('open');
+  overlay.setAttribute('aria-hidden', 'true');
+  overlay.inert = true;
+}
+
+function initInstall() {
+  const overlay = $('install-modal-overlay');
+  installOs = loadInstallOs();
+
+  $('install-toggle').addEventListener('click', openInstallModal);
+  $('install-modal-close').addEventListener('click', closeInstallModal);
+  overlay.addEventListener('click', e => {
+    if (e.target === overlay) closeInstallModal();
+  });
+
+  document.querySelectorAll('.install-os-btn').forEach(b => {
+    b.addEventListener('click', () => {
+      installOs = b.dataset.os;
+      try { localStorage.setItem(INSTALL_OS_KEY, installOs); } catch (e) { /* no es crítico */ }
+      renderInstall();
+    });
+  });
+
+  $('install-now').addEventListener('click', () => {
+    const p = installPrompt;
+    if (!p) return;
+    p.prompt();
+    // El navegador solo deja usar el evento una vez
+    p.userChoice.finally(() => { installPrompt = null; renderInstall(); });
+  });
+
+  renderInstall();
+}
+
+
+// ── ACTUALIZACIÓN DE LA APP ───────────────────────────────────────────────
+// Cada vez que se sube la versión (CACHE) en service-worker.js, las apps ya
+// instaladas descargan la versión nueva en segundo plano y esta página se
+// recarga sola para mostrarla. Nunca se recarga con sonidos sonando ni con el
+// temporizador corriendo (cortaría el audio): espera a que no haya nada activo.
+let updatePending = false;
+
+function isSessionActive() {
+  return !!timerInterval || Object.values(state).some(st => st.playing);
+}
+
+function applyUpdateIfIdle() {
+  if (updatePending && !isSessionActive()) location.reload();
+}
+
+function initUpdates() {
+  if (!('serviceWorker' in navigator)) return;
+
+  // La primera instalación del service worker también dispara este evento,
+  // pero no es una versión nueva: solo cuenta si la página ya tenía uno.
+  let hadController = !!navigator.serviceWorker.controller;
+  navigator.serviceWorker.addEventListener('controllerchange', () => {
+    if (!hadController) { hadController = true; return; }
+    updatePending = true;
+    applyUpdateIfIdle();
+  });
+
+  // Una app instalada casi nunca "navega" (queda en memoria): cada vez que
+  // vuelve al primer plano se busca si hay una versión nueva
+  document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState !== 'visible') return;
+    applyUpdateIfIdle();
+    navigator.serviceWorker.getRegistration()
+      .then(reg => reg && reg.update())
+      .catch(() => {}); // sin conexión
   });
 }
